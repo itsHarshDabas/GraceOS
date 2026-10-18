@@ -10,8 +10,8 @@ Each brief is meant to be pasted directly to a coding agent (Claude Code, OpenCo
 | T-003 | Grace Shell: framework ADR and first prototype | `desktop/` | Shell lead | in progress | — |
 | T-004 | Intelligence Layer architecture doc | `docs/intelligence-layer.md` | Harsh | todo | — |
 | T-005 | Agent Hub: adapter core and two adapters | `services/agent-hub/` | unassigned | todo | — |
-| T-006 | Model manager: GGUF metadata and memory estimate | `services/model-manager/` | Harsh (Cline) | in progress, branch `ai/gguf-metadata` | — |
-| T-007 | Hardware detection CLI (read-only) | `services/hardware-detection/` | Harsh (Cline) | in progress, branch `services/hardware-detection` | — |
+| T-006 | Model manager: GGUF metadata and memory estimate | `services/model-manager/` | Harsh (Cline) | review: branch `ai/gguf-metadata`, 20 tests, checked against a real GGUF | — |
+| T-007 | Hardware detection CLI (read-only) | `services/hardware-detection/` | Harsh (Cline) | review: branch `services/hardware-detection`, 15 tests, real-machine run | — |
 | T-008 | Desktop foundation: KDE Plasma package set for the live ISO | `iso/` (separate branch) | unassigned | todo | T-001 |
 | T-009 | Choose a LICENSE | repo root | Harsh (owner decision) | blocked | — |
 | T-010 | Security review of `build/` and `iso/` | review only | unassigned | todo | T-001 |
