@@ -1,9 +1,15 @@
 name: build-iso
-# Manual only until boot-test.sh is proven (T-002); then add push.
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['iso/**', 'build/**', '.github/workflows/build-iso.yml']
+  pull_request:
+    paths: ['iso/**', 'build/**', '.github/workflows/build-iso.yml']
 jobs:
   iso:
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     container:
       image: archlinux:latest
       options: --privileged
@@ -12,7 +18,13 @@ jobs:
       - uses: actions/checkout@v4
       - run: build/check-packages.sh
       - run: build/build-iso.sh
-      - run: build/boot-test.sh out/graceos-*.iso bios
-      - run: build/boot-test.sh out/graceos-*.iso uefi
+      - run: build/verify-iso.sh out/graceos-*.iso
+      # boot-test.sh uses KVM when the runner exposes /dev/kvm and falls back to (slow) TCG otherwise.
+      - run: build/boot-test.sh out/graceos-*.iso bios 900
+      - run: build/boot-test.sh out/graceos-*.iso uefi 900
       - uses: actions/upload-artifact@v4
-        with: { name: graceos-iso, path: out/ }
+        with: { name: graceos-iso-sha256, path: out/*.sha256 }
+      # The 1.7 GB ISO is only kept for manual runs, to save artifact storage.
+      - if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with: { name: graceos-iso, path: out/*.iso, retention-days: 7 }

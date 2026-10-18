@@ -1,6 +1,6 @@
 # GraceOS project status
 
-_Last updated: 2026-10-18_
+_Last updated: 2026-10-19_
 
 ## Team
 - **Harsh** (itsHarshDabas): base and ISO, AI platform, overall integration. Works with Claude Code, OpenCode and Cline.
@@ -14,17 +14,42 @@ _Last updated: 2026-10-18_
   - the name changed to `graceos`, and GraceOS branding on the boot menus (UEFI systemd-boot, GRUB, syslinux), the MOTD and the hostname;
   - 15 official developer packages added to `packages.x86_64` (git, base-devel, python, uv, nodejs, ripgrep, btop and others);
   - the profile's symlinks recorded in `iso/symlinks.txt`, and recreated by `build/build-iso.sh`.
-- `build/build-iso.sh`, `check-packages.sh` and `boot-test.sh`, plus `.github/workflows/build-iso.yml` (manual trigger only).
+- `build/build-iso.sh`, `check-packages.sh`, `verify-iso.sh` (content checks) and `boot-test.sh` (QEMU boot, waits for the sshd banner).
+- `.github/workflows/build-iso.yml`: runs check, build, verify and both boots on pushes to `main` and on PRs touching `iso/`, `build/` or the workflow.
 
-### Tested (2026-10-18, in an Arch live VM)
-- `build/check-packages.sh`: **passed**. Every manifest package resolves in the official repos.
-- First `build-iso.sh` run: packages installed into the image, and inside that root `git`, `python`, `node`, `uv`, `rg`, `btop` and `fastfetch` all resolved.
-  - That run used an earlier symlink heuristic, which missed `etc/resolv.conf` and the masked `systemd-gpt-auto-generator`. I aborted it on purpose and replaced the heuristic with the manifest.
-- **A second build with the manifest is running. As of this commit, no ISO has completed, and none has been boot-tested.**
+### Tested (2026-10-18)
+
+**Build** (in the Arch live VM):
+- `build/check-packages.sh` **passed**: every manifest package resolves in the official repos.
+- `build/build-iso.sh` **succeeded**, producing `graceos-2026.10.18-x86_64.iso`:
+  - 1.7 GB, sha256 `dfe15fa918e13303a479e6cc35e090cd90ca01a34523942df80c5d42a3003226`;
+  - `sha256sum -c` passes both in the VM and on the host;
+  - no `ERROR` or `Failed to read` lines in the build log.
+
+**ISO contents** (checked by mounting the ISO and its `airootfs.sfs`):
+- Volume label `GRACEOS_202610`.
+- Every UEFI and BIOS boot menu entry reads "GraceOS live medium".
+- `/etc/hostname` is `graceos`, and the GraceOS MOTD is present.
+- `resolv.conf`, `localtime`, the masked `systemd-gpt-auto-generator` and the `*.wants` links are real symlinks.
+- `git`, `python`, `node`, `npm`, `uv`, `rg`, `fd`, `jq`, `btop`, `fastfetch`, `tmux`, `makepkg` and `lspci` are present.
+
+**Boot** (VMware Workstation 26, ISO only, no disk, 3 GB RAM):
+
+| Firmware | Result |
+|---|---|
+| UEFI | Booted to multi-user in about 40 s. DHCP lease with `client-hostname "graceos"`; sshd answers ("Permission denied" for root, which has no password). |
+| BIOS | Booted. DHCP lease with `client-hostname "graceos"`; sshd answers the same way. |
+
+**Automated checks** (2026-10-19, run inside the builder VM; QEMU 11.1.2 without KVM, i.e. TCG):
+- `verify-iso.sh`: all 55 checks passed. On the stock Arch ISO it correctly fails the branding, hostname and tool checks.
+- `boot-test.sh` BIOS: **PASS**, sshd banner after 85 s.
+- `boot-test.sh` UEFI (OVMF 4m): **PASS**, sshd banner after 80 s.
+- Negative test: a random-bytes "ISO" gives FAIL with rc=1, and no QEMU process is left behind.
 
 ### Not done or unverified
-- `boot-test.sh` is unproven. The stock kernel command line has no `console=ttyS0`, so the serial grep probably never matches. QEMU in CI has no KVM, so the 300 s timeout may be too short. The OVMF path is unchecked. (T-002)
-- The CI workflow has never run.
+- **Interactive console not observed**: the tty1 autologin shell, the MOTD on screen, and running the tools on the booted system. Boot was verified only through DHCP, the hostname and sshd.
+- Only VMware has been tested; no real hardware yet.
+- The CI workflow has not run on GitHub yet. Runner disk space and KVM availability are unconfirmed; the boot test falls back to TCG.
 - No LICENSE yet; that's the owner's decision (T-009).
 
 ## Build environment (how Harsh builds on Windows)
@@ -39,8 +64,13 @@ _Last updated: 2026-10-18_
   5. `pacman -Sy archiso`.
   6. Copy the repo over with tar and scp, then `WORK_DIR=/mnt/build/work bash build/build-iso.sh`.
 - VMware Tools never reached the "running" state in the stock live ISO, so `vmrun runProgramInGuest` doesn't work. Use SSH.
+- **Gotchas that cost real time:**
+  - Run remote commands through Git Bash `ssh`, not Windows PowerShell 5.1. PowerShell strips embedded double quotes, which turns `"a|b"` into a real pipe.
+  - Never `pkill -f <pattern>` over ssh. It matches the remote shell's own command line and kills it, so the remaining commands silently don't run. Kill by PID instead.
+  - Closing the VMware window suspends the VM. Resume it with `vmrun -T ws start <vmx> nogui`.
+- Boot-test VM: `D:\GraceOS-vm\test\graceos-test.vmx`, with a fixed MAC `00:50:56:3A:00:01`. Its lease and hostname show up in `C:\ProgramData\VMware\vmnetdhcp.leases`.
 
 ## Next actions
-1. Finish the build, then boot the output ISO in VMware (UEFI) and confirm: GraceOS boot menu, live shell, network, and dev tools present. (T-001)
-2. Fix the boot test and enable CI on push. (T-002)
-3. Write the Intelligence Layer architecture doc (T-004), and hand T-005, T-006 and T-007 to agents.
+1. Confirm the first GitHub CI run passes.
+2. Decide on a LICENSE. (T-009)
+3. Review and merge T-006 and T-007 (delegated to Cline). Write the Intelligence Layer architecture doc (T-004).
