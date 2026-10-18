@@ -34,4 +34,15 @@ for b in git python node npm uv rg fd jq btop fastfetch tmux makepkg lspci sshd;
   check "tool $b" '[[ -e $sfs/usr/bin/$b || -L $sfs/usr/bin/$b ]]'
 done
 
+for b in Hyprland qs foot nautilus nmcli wpctl grace-candyland grace-approve; do
+  check "tool $b" '[[ -e $sfs/usr/bin/$b || -L $sfs/usr/bin/$b ]]'
+done
+check "Grace Candyland session entry" '[[ -f $sfs/usr/share/wayland-sessions/grace-candyland.desktop ]]'
+check "Grace shell installed" '[[ -f $sfs/usr/share/grace-candyland/shell/shell.qml ]]'
+check "grace-* commands are executable" '[[ -x $sfs/usr/bin/grace-candyland && -x $sfs/usr/bin/grace-approve && -x $sfs/usr/bin/grace-launch && -x $sfs/usr/bin/grace-settings ]]'
+check "live user grace (uid 1000, wheel)" 'grep -q "^grace:x:1000:1000:" "$sfs/etc/passwd" && grep -q "^wheel:.*grace" "$sfs/etc/group"'
+check "tty1 autologin is grace" 'grep -q -- "--autologin grace" "$sfs/etc/systemd/system/getty@tty1.service.d/autologin.conf"'
+check "grace's login starts the desktop" 'grep -q grace-candyland "$sfs/home/grace/.bash_profile" && [[ $(stat -c %u "$sfs/home/grace/.bash_profile") == 1000 ]]'
+check "sudoers drop-in is 0440 root" '[[ $(stat -c %a:%u "$sfs/etc/sudoers.d/10-grace-live") == 440:0 ]]'
+
 (( fails == 0 )) && echo "ALL CHECKS PASSED" || { echo "$fails check(s) failed"; exit 1; }

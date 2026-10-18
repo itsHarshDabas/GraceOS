@@ -14,7 +14,7 @@ jobs:
       image: archlinux:latest
       options: --privileged
     steps:
-      - run: pacman -Syu --noconfirm archiso git qemu-base edk2-ovmf
+      - run: pacman -Syu --noconfirm archiso git make qemu-base edk2-ovmf
       - uses: actions/checkout@v4
       - run: build/check-packages.sh
       - run: build/build-iso.sh
