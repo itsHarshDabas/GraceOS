@@ -5,13 +5,13 @@ Each brief is meant to be pasted directly to a coding agent (Claude Code, OpenCo
 
 | ID | Task | Directory | Owner | Status | Depends on |
 |---|---|---|---|---|---|
-| T-001 | Build the ISO and boot-test it in a VM | `iso/`, `build/` | Harsh | in progress | — |
-| T-002 | Make `boot-test.sh` reliable, then enable CI on push | `build/`, `.github/` | Harsh | todo | T-001 |
+| T-001 | Build the ISO and boot-test it in a VM | `iso/`, `build/` | Harsh | done (UEFI and BIOS boot verified in VMware; console not observed) | — |
+| T-002 | Make `boot-test.sh` reliable, then enable CI on push | `build/`, `.github/` | Harsh | review (passes locally; CI not yet run) | T-001 |
 | T-003 | Grace Shell: framework ADR and first prototype | `desktop/` | Shell lead | in progress | — |
 | T-004 | Intelligence Layer architecture doc | `docs/intelligence-layer.md` | Harsh | todo | — |
 | T-005 | Agent Hub: adapter core and two adapters | `services/agent-hub/` | unassigned | todo | — |
-| T-006 | Model manager: GGUF metadata and memory estimate | `services/model-manager/` | unassigned | todo | — |
-| T-007 | Hardware detection CLI (read-only) | `services/hardware-detection/` | unassigned | todo | — |
+| T-006 | Model manager: GGUF metadata and memory estimate | `services/model-manager/` | Harsh (Cline) | in progress, branch `ai/gguf-metadata` | — |
+| T-007 | Hardware detection CLI (read-only) | `services/hardware-detection/` | Harsh (Cline) | in progress, branch `services/hardware-detection` | — |
 | T-008 | Desktop foundation: KDE Plasma package set for the live ISO | `iso/` (separate branch) | unassigned | todo | T-001 |
 | T-009 | Choose a LICENSE | repo root | Harsh (owner decision) | blocked | — |
 | T-010 | Security review of `build/` and `iso/` | review only | unassigned | todo | T-001 |

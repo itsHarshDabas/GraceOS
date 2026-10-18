@@ -17,9 +17,11 @@ Needs a real Arch Linux environment (a VM is fine). It will not run on native Wi
 sudo pacman -S archiso
 sudo build/check-packages.sh   # verify every package in the manifest exists
 sudo build/build-iso.sh        # -> out/graceos-<date>-x86_64.iso (+ .sha256)
-build/boot-test.sh out/graceos-*.iso bios   # needs qemu-base (uefi also needs edk2-ovmf); see T-002
+sudo build/verify-iso.sh out/graceos-*.iso          # checksum, branding, symlinks, required tools
+build/boot-test.sh out/graceos-*.iso bios           # boots in QEMU and waits for sshd (needs qemu-base)
+build/boot-test.sh out/graceos-*.iso uefi           # also needs edk2-ovmf
 ```
-Alternatively, run the `build-iso` GitHub Actions workflow manually (it builds in an Arch container).
+The `build-iso` GitHub Actions workflow runs the same steps in an Arch container on every push to `main` and every PR that touches `iso/`, `build/` or the workflow. It can also be triggered manually, and only manual runs keep the ISO as an artifact.
 
 ## Layout
 - `iso/`: a copy of the upstream archiso `releng` profile (commit 723da19), with GraceOS branding and a developer package block. `iso/symlinks.txt` lists the profile's symlinks, which the build recreates for Windows checkouts.
