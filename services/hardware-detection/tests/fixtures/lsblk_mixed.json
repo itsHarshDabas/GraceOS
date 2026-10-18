@@ -1,0 +1,59 @@
+{
+  "blockdevices": [
+    {
+      "name": "nvme0n1",
+      "size": 1000204886016,
+      "type": "disk",
+      "model": "Samsung SSD 980 PRO 1TB",
+      "rota": false,
+      "tran": "nvme",
+      "children": [
+        {"name": "nvme0n1p1", "size": 536870912, "type": "part", "model": null, "rota": false, "tran": null},
+        {"name": "nvme0n1p2", "size": 999668012544, "type": "part", "model": null, "rota": false, "tran": null}
+      ]
+    },
+    {
+      "name": "sda",
+      "size": "500107862016",
+      "type": "disk",
+      "model": "Samsung SSD 870 EVO 500GB",
+      "rota": false,
+      "tran": "sata",
+      "children": [
+        {"name": "sda1", "size": 500106788864, "type": "part", "model": null, "rota": false, "tran": null}
+      ]
+    },
+    {
+      "name": "sdb",
+      "size": 31268536320,
+      "type": "disk",
+      "model": "WD Elements 25A3",
+      "rota": true,
+      "tran": "usb"
+    },
+    {
+      "name": "sdc",
+      "size": 160041885696,
+      "type": "disk",
+      "model": null,
+      "rota": "0",
+      "tran": null
+    },
+    {
+      "name": "loop0",
+      "size": 66355200,
+      "type": "loop",
+      "model": null,
+      "rota": false,
+      "tran": null
+    },
+    {
+      "name": "sr0",
+      "size": 1073741312,
+      "type": "rom",
+      "model": "VMware Virtual SATA CDROM",
+      "rota": false,
+      "tran": "sata"
+    }
+  ]
+}

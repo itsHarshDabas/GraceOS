@@ -1,0 +1,9 @@
+00:00.0 Host bridge [0600]: Intel Corporation 440FX - 82441FX PMC [Natoma] [8086:1237] (rev 02)
+	Subsystem: VMware Virtual Machine Chipset [15ad:1976]
+00:0f.0 VGA compatible controller [0300]: VMware SVGA II Adapter [15ad:0405] (rev 00)
+	Subsystem: VMware SVGA II Adapter [15ad:0405]
+00:11.0 PCI bridge [0604]: VMware PCI bridge [15ad:0790] (rev 02)
+03:00.0 Ethernet controller [0200]: VMware VMXNET3 Ethernet Controller [15ad:07b0] (rev 01)
+	Subsystem: VMware VMXNET3 Ethernet Controller [15ad:07b0]
+	Kernel driver in use: vmxnet3
+	Kernel modules: vmxnet3

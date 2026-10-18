@@ -1,0 +1,16 @@
+0b:00.0 VGA compatible controller [0300]: Advanced Micro Devices, Inc. [AMD/ATI] Navi 23 [Radeon RX 6600/6600 XT/6600M] [1002:73ff] (rev c7)
+	Subsystem: Sapphire Technology Limited Device [1da2:462d]
+	Kernel driver in use: amdgpu
+	Kernel modules: amdgpu
+0b:00.1 Audio device [0403]: Advanced Micro Devices, Inc. [AMD/ATI] Navi 21/23 HDMI/DP Audio Controller [1002:ab28]
+	Subsystem: Sapphire Technology Limited Device [1da2:462d]
+	Kernel driver in use: snd_hda_intel
+	Kernel modules: snd_hda_intel
+01:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd NVMe SSD Controller PM9A1/PM9A3/980PRO [144d:a80a] (rev 01)
+	Subsystem: Samsung Electronics Co Ltd Device [144d:a801]
+	Kernel driver in use: nvme
+	Kernel modules: nvme
+03:00.0 Ethernet controller [0200]: Realtek Semiconductor Co., Ltd. RTL8125 2.5GbE Controller [10ec:8125] (rev 05)
+	Subsystem: ASRock Incorporation Device [1849:d817]
+	Kernel driver in use: r8169
+	Kernel modules: r8169

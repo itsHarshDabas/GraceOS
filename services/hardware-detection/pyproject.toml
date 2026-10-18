@@ -1,0 +1,23 @@
+[project]
+name = "grace-hw"
+version = "0.1.0"
+description = "Read-only hardware detection CLI for GraceOS"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+grace-hw = "grace_hw.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/grace_hw"]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
