@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Grace Shell mockup</title>
+<style>:root{--text-primary:#1d1f24;--text-secondary:#5c6270}body{margin:0;padding:24px 16px;background:#f3f4f6;color:var(--text-primary);font-family:Inter,system-ui,sans-serif}h2{margin:0 0 6px}.subtitle{color:var(--text-secondary);margin:0 0 8px}</style>
+</head><body>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650&display=swap');
+  .gos{--accent:#3584e4;--gap:10px;--radius:12px;--blur:14px;
+       --hair:rgba(255,255,255,.08);--glass:rgba(22,24,31,.82);
+       font:13px/1.4 Inter,system-ui,sans-serif;color:#e6e8ee;letter-spacing:-.005em}
+  .gos.noblur{--blur:0px}
+  .gos h3.sec{color:var(--text-primary);margin:22px 0 10px;font-family:Inter,system-ui,sans-serif}
+  .ac{color:var(--accent)}.dim{color:#7d8392}.g{color:#7ed99c}.r{color:#ff8a8a}
+  svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  svg.i.s14{width:14px;height:14px}
+  /* desktop */
+  .desk{position:relative;width:100%;max-width:1100px;margin:0 auto;aspect-ratio:16/9;border-radius:12px;overflow:hidden;
+        background:radial-gradient(110% 90% at 12% 8%,color-mix(in srgb,var(--accent) 20%,#1b1e27) 0%,transparent 60%),
+                   radial-gradient(90% 80% at 92% 95%,#232733 0%,transparent 60%),#121419}
+  .bar{position:absolute;left:0;right:0;top:0;height:30px;display:flex;align-items:center;justify-content:space-between;
+       padding:0 var(--gap);background:rgba(10,11,15,.72);backdrop-filter:blur(var(--blur));z-index:3;font-size:12.5px;font-weight:500}
+  .pill{height:22px;padding:0 10px;border-radius:999px;display:inline-flex;align-items:center;gap:7px;color:#dfe2ea}
+  .pill.btn{background:rgba(255,255,255,.07)}
+  .ask{background:rgba(255,255,255,.06);border:1px solid var(--hair);color:#aeb3c0;min-width:210px;justify-content:space-between}
+  kbd{font:500 10.5px Inter,system-ui;color:#8a90a0;padding:1px 5px;border-radius:5px;background:rgba(255,255,255,.07)}
+  .tray.open{background:rgba(255,255,255,.14)}
+  .tiles{position:absolute;top:calc(30px + var(--gap));left:var(--gap);right:var(--gap);bottom:var(--gap);
+         display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:var(--gap)}
+  .win{border-radius:var(--radius);background:rgba(22,24,30,.95);border:1px solid var(--hair);
+       box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 12px 32px rgba(0,0,0,.38);overflow:hidden;min-height:0}
+  .win.tall{grid-row:1 / span 2}
+  .tt{position:relative;height:30px;display:flex;align-items:center;padding:0 11px;background:rgba(255,255,255,.03);
+      border-bottom:1px solid rgba(255,255,255,.05);font-size:12px;color:#9aa0b0;font-weight:500}
+  .tt .title{position:absolute;left:0;right:0;text-align:center;pointer-events:none}
+  .win.focus .tt{color:#d6d9e1}
+  .tl{display:flex;gap:7px;position:relative;z-index:1}
+  .tl i{width:11px;height:11px;border-radius:50%;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.28)}
+  .tl i:nth-child(1){background:#ff5f57}.tl i:nth-child(2){background:#febc2e}.tl i:nth-child(3){background:#28c840}
+  .bd{padding:9px 12px;font-family:ui-monospace,"JetBrains Mono",monospace;font-size:12px;color:#b8bdcc;line-height:1.6}
+  .hint{display:flex;gap:8px;align-items:flex-start;margin-top:8px;padding:8px 10px;border-radius:10px;
+        background:rgba(255,255,255,.045);border:1px solid var(--hair);font:12px/1.45 Inter,system-ui;color:#d2d5de}
+  .hint a{color:#eef0f4;text-decoration:underline;text-decoration-color:rgba(255,255,255,.3);text-underline-offset:2px}
+  /* control center */
+  .cc{position:absolute;top:calc(30px + var(--gap));right:var(--gap);width:31%;bottom:var(--gap);z-index:4;display:flex;flex-direction:column;gap:14px;
+      padding:16px;border-radius:calc(var(--radius) + 8px);background:var(--glass);backdrop-filter:blur(calc(var(--blur) * 2)) saturate(140%);
+      border:1px solid var(--hair);box-shadow:0 24px 60px rgba(0,0,0,.55);font-size:12px;overflow:hidden}
+  .cc-top{display:flex;justify-content:space-between;align-items:center;color:#c9ccd6}
+  .cc-top .btns{display:flex;gap:6px}
+  .rb{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.07);color:#d9dce5}
+  .tg{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:48px;gap:8px}
+  .t{display:flex;align-items:center;gap:10px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.065);color:#d9dce5;cursor:pointer;transition:background .2s}
+  .t.on{background:var(--accent);color:#fff}
+  .t small{display:block;font-size:10.5px;opacity:.75}
+  .sl{display:flex;align-items:center;gap:12px;color:#c9ccd6;padding:0 6px}
+  .sliders{display:flex;flex-direction:column;gap:14px;padding:2px 0}
+  .track{flex:1;height:6px;border-radius:6px;background:rgba(255,255,255,.12);position:relative}
+  .track i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:var(--accent)}
+  .track i::after{content:"";position:absolute;right:-7px;top:-4px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+  .aicard{display:flex;flex-direction:column;gap:10px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.045)}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .row > span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .mini{padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.09);font-size:11px;white-space:nowrap;color:#e3e5eb}
+  .mini.pri{background:var(--accent);color:#fff}
+  .sw-s{width:30px;height:17px;border-radius:999px;background:var(--accent);position:relative;flex:none}
+  .sw-s::after{content:"";position:absolute;right:2px;top:2px;width:13px;height:13px;border-radius:50%;background:#fff}
+  .nh{display:flex;justify-content:space-between;color:#8d93a2;font-size:11px;margin:0 2px -6px}
+  .notifs{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px;scrollbar-width:none;
+          -webkit-mask-image:linear-gradient(to bottom,#000 82%,transparent);mask-image:linear-gradient(to bottom,#000 82%,transparent);padding-bottom:18px}
+  .n{display:flex;gap:9px;padding:7px 10px;border-radius:14px;background:rgba(255,255,255,.045)}
+  .n .ico{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,.08);color:#d9dce5;flex:none}
+  .n b{font-weight:600}
+  /* dock */
+  .hot{position:absolute;left:30%;right:30%;bottom:0;height:72px;z-index:5}
+  .handle{position:absolute;left:50%;bottom:5px;width:64px;height:4px;margin-left:-32px;border-radius:4px;background:rgba(255,255,255,.26);transition:opacity .25s}
+  .dock{position:absolute;left:50%;bottom:10px;display:flex;gap:8px;padding:7px;border-radius:18px;
+        background:rgba(18,19,25,.74);backdrop-filter:blur(var(--blur));border:1px solid var(--hair);box-shadow:0 14px 34px rgba(0,0,0,.45);
+        transform:translate(-50%,130%);opacity:0;transition:transform .38s cubic-bezier(.2,.9,.25,1.15),opacity .25s}
+  .hot:hover .dock{transform:translate(-50%,0);opacity:1}
+  .hot:hover .handle{opacity:0}
+  .dock b{position:relative;width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.07);display:grid;place-items:center;color:#d9dce5;transition:transform .2s,background .2s}
+  .dock b:hover{transform:translateY(-4px);background:rgba(255,255,255,.12)}
+  .dock b svg.i{width:22px;height:22px}
+  .dock b.ai{color:var(--accent)}
+  .dock b.run::after{content:"";position:absolute;bottom:3px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:#cfd3dc}
+  .dock .sep{width:1px;margin:6px 2px;background:rgba(255,255,255,.12)}
+  /* settings */
+  .app{max-width:1100px;margin:0 auto;border-radius:14px;overflow:hidden;background:#1c1e25;border:1px solid var(--hair);box-shadow:0 18px 44px rgba(0,0,0,.35)}
+  .app > .tt{height:38px;background:#181a20}
+  .appbody{display:flex;height:600px}
+  .side{width:232px;flex:none;background:#17191f;padding:10px 8px;overflow:auto;border-right:1px solid rgba(255,255,255,.05)}
+  .search{display:flex;gap:8px;align-items:center;padding:7px 10px;margin:2px 4px 10px;border-radius:9px;background:rgba(255,255,255,.06);color:#8a90a0}
+  .grp{font-size:11px;color:#7a8090;margin:12px 10px 4px;font-weight:500}
+  .it{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:9px;color:#d2d5de}
+  .it.sel{background:rgba(255,255,255,.08);color:#fff}
+  .it.sel svg{color:var(--accent)}
+  .page{flex:1;overflow:auto;padding:22px 30px}
+  .page h1{font-size:20px;font-weight:650;margin:0 0 2px;color:#f1f2f6;letter-spacing:-.01em}
+  .page .lead{color:#8a90a0;margin:0 0 16px}
+  .box{border-radius:12px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);margin-bottom:14px}
+  .box .r{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 14px;border-top:1px solid rgba(255,255,255,.05)}
+  .box .r:first-child{border-top:0}
+  .box .r p{margin:0;color:#e9ebf0}.box .r p small{display:block;color:#7f8595;font-size:11.5px;margin-top:2px}
+  .styles{display:flex;gap:12px}
+  .sty{width:118px;border-radius:10px;padding:5px;cursor:pointer;text-align:center;color:#c9ccd6;font-size:12px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+  .sty.on{box-shadow:inset 0 0 0 2px var(--accent)}
+  .sty div{height:60px;border-radius:7px;margin-bottom:5px}
+  .sw{display:flex;gap:9px}
+  .sw button{width:22px;height:22px;border-radius:50%;border:0;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+  .sw button:hover,.sw button:focus{outline:2px solid rgba(255,255,255,.85);outline-offset:2px}
+  input[type=range]{width:200px;accent-color:var(--accent)}
+  .seg{display:inline-flex;background:rgba(255,255,255,.06);border-radius:9px;padding:3px}
+  .seg span{padding:5px 12px;border-radius:7px;cursor:pointer;color:#c9ccd6;font-size:12.5px}
+  .seg span.on{background:rgba(255,255,255,.14);color:#fff}
+  .toggle{width:40px;height:22px;border-radius:999px;background:var(--accent);position:relative;cursor:pointer;flex:none;transition:background .2s}
+  .toggle::after{content:"";position:absolute;top:3px;left:21px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s}
+  .toggle.off{background:rgba(255,255,255,.18)}.toggle.off::after{left:3px}
+  .drop{display:inline-flex;align-items:center;gap:8px;padding:5px 10px 5px 12px;border-radius:9px;background:rgba(255,255,255,.07);color:#e3e5eb;font-size:12.5px}
+  .chev{color:#7f8595}
+  .val{color:#8a90a0;font-variant-numeric:tabular-nums;width:38px;text-align:right}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="spark" viewBox="0 0 24 24"><path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1L5 10.5l5.1-1.9z"/><path d="M18.5 15.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/></symbol>
+  <symbol id="wifi" viewBox="0 0 24 24"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M9 16a4.5 4.5 0 0 1 6 0"/><path d="M12 19.5h.01"/></symbol>
+  <symbol id="bt" viewBox="0 0 24 24"><path d="M7 7l10 10-5 4V3l5 4L7 17"/></symbol>
+  <symbol id="vol" viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4zM15.5 8.5a5 5 0 0 1 0 7"/></symbol>
+  <symbol id="bat" viewBox="0 0 24 24"><rect x="2.5" y="7" width="17" height="10" rx="2.5"/><path d="M22 10.5v3"/><rect x="5" y="9.5" width="9" height="5" rx="1" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol>
+  <symbol id="bell" viewBox="0 0 24 24"><path d="M18 8.5a6 6 0 1 0-12 0c0 6.5-2.5 8.5-2.5 8.5h17S18 15 18 8.5M10.3 20.5a2 2 0 0 0 3.4 0"/></symbol>
+  <symbol id="gauge" viewBox="0 0 24 24"><path d="M4.5 17a8.5 8.5 0 1 1 15 0"/><path d="M12 13l3.5-4"/><circle cx="12" cy="13" r="1.2"/></symbol>
+  <symbol id="night" viewBox="0 0 24 24"><path d="M12 3a6.5 6.5 0 0 0 8.5 8.5A8.5 8.5 0 1 1 12 3z"/><path d="M18 3.5v3M16.5 5h3"/></symbol>
+  <symbol id="gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/></symbol>
+  <symbol id="power" viewBox="0 0 24 24"><path d="M12 3v8M7 6.5a7 7 0 1 0 10 0"/></symbol>
+  <symbol id="chat" viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4A8 8 0 1 1 20 12z"/></symbol>
+  <symbol id="down" viewBox="0 0 24 24"><path d="M12 3.5v11M7.5 10.5l4.5 4.5 4.5-4.5M4.5 20h15"/></symbol>
+  <symbol id="folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="term" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M7 9l3 3-3 3M12.5 15H17"/></symbol>
+  <symbol id="globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/></symbol>
+  <symbol id="code" viewBox="0 0 24 24"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5"/></symbol>
+  <symbol id="bot" viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4.5V8M9.5 13v1M14.5 13v1"/></symbol>
+  <symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+  <symbol id="display" viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+  <symbol id="appear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></symbol>
+  <symbol id="grid" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></symbol>
+  <symbol id="kbd" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></symbol>
+  <symbol id="shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></symbol>
+  <symbol id="info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="chevr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="chevd" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+</svg>
+
+<div class="gos" id="gos">
+<h2>Polished: title-bar dots, no colored outlines, no emojis</h2>
+<p class="subtitle">Accent color now only fills small things (toggles, sliders, primary buttons). Panels use a hairline edge, soft shadow and blur. Hover the bottom-middle edge for the dock. The Settings controls below still change the desktop live.</p>
+
+<h3 class="sec">1 · Desktop with the control center open</h3>
+<div class="desk">
+  <div class="bar">
+    <span class="pill btn">Activities</span>
+    <span class="pill ask"><span style="display:inline-flex;gap:7px;align-items:center"><svg class="i s14 ac"><use href="#spark"/></svg>Ask Grace…</span><kbd>Super Space</kbd></span>
+    <span class="pill btn tray open"><svg class="i s14"><use href="#wifi"/></svg><svg class="i s14"><use href="#vol"/></svg><svg class="i s14"><use href="#bat"/></svg><span>72%</span><span style="margin-left:4px">Sun 14:05</span></span>
+  </div>
+  <div class="tiles">
+    <div class="win tall focus"><div class="tt"><span class="tl"><i></i><i></i><i></i></span><span class="title">Terminal — ~/graceos</span></div>
+      <div class="bd"><span class="g">$</span> pytest -q<br><span class="r">1 failed</span>, 34 passed
+        <div class="hint"><svg class="i s14 ac" style="margin-top:1px"><use href="#spark"/></svg><span>The test file has Windows line endings. <a>Explain</a> · <a>Fix it</a> · <span class="dim">Dismiss</span></span></div></div></div>
+    <div class="win"><div class="tt"><span class="tl"><i></i><i></i><i></i></span><span class="title">Code — parsers.py</span></div><div class="bd dim">def parse_lspci(text):<br>&nbsp;&nbsp;&nbsp;&nbsp;gpus = []</div></div>
+    <div class="win"><div class="tt"><span class="tl"><i></i><i></i><i></i></span><span class="title">Files — Downloads</span></div><div class="bd dim">model.gguf · report.pdf · wallpaper.png</div></div>
+  </div>
+
+  <div class="cc">
+    <div class="cc-top"><span style="display:inline-flex;gap:7px;align-items:center"><svg class="i s14"><use href="#bat"/></svg>72% · 3 h 10 min left</span>
+      <span class="btns"><span class="rb" title="Settings"><svg class="i s14"><use href="#gear"/></svg></span><span class="rb" title="Power"><svg class="i s14"><use href="#power"/></svg></span></span></div>
+    <div class="tg">
+      <div class="t on" onclick="this.classList.toggle('on')"><svg class="i"><use href="#wifi"/></svg><span>Wi-Fi<small>Home-5G</small></span></div>
+      <div class="t on" onclick="this.classList.toggle('on')"><svg class="i"><use href="#bt"/></svg><span>Bluetooth<small>Headphones</small></span></div>
+      <div class="t" onclick="this.classList.toggle('on')"><svg class="i"><use href="#bell"/></svg><span>Do Not Disturb</span></div>
+      <div class="t on" onclick="this.classList.toggle('on')"><svg class="i"><use href="#moon"/></svg><span>Dark Style</span></div>
+      <div class="t" onclick="this.classList.toggle('on')"><svg class="i"><use href="#gauge"/></svg><span>Power Mode<small>Balanced</small></span></div>
+      <div class="t" onclick="this.classList.toggle('on')"><svg class="i"><use href="#night"/></svg><span>Night Light</span></div>
+    </div>
+    <div class="sliders">
+    <div class="sl"><svg class="i"><use href="#vol"/></svg><div class="track"><i style="width:62%"></i></div></div>
+    <div class="sl"><svg class="i"><use href="#sun"/></svg><div class="track"><i style="width:78%"></i></div></div>
+    </div>
+
+    <div class="aicard">
+      <div class="row"><span style="display:inline-flex;gap:7px;align-items:center"><svg class="i s14 ac"><use href="#spark"/></svg><b>Local AI</b><span class="dim">· on this device</span></span><span class="sw-s" title="AI features on"></span></div>
+      <div class="row"><span>Qwen2.5-Coder 7B <span class="dim">· 5.2 GB VRAM</span></span><span class="mini">Stop</span></div>
+      <div class="row"><span>Claude Code <span class="dim">· editing ~/graceos</span></span><span class="mini">Open</span></div>
+    </div>
+
+    <div class="nh"><span>Notifications</span><span>Clear all</span></div>
+    <div class="notifs">
+    <div class="n"><span class="ico ac"><svg class="i s14"><use href="#spark"/></svg></span><div style="flex:1">
+      <b>Claude Code wants to run</b><div class="dim" style="font-family:ui-monospace,monospace">npm install express</div>
+      <div style="margin-top:6px;display:flex;gap:5px"><span class="mini pri">Allow once</span><span class="mini">Deny</span><span class="mini">Details</span></div></div></div>
+    <div class="n"><span class="ico"><svg class="i s14"><use href="#chat"/></svg></span><div><b>Discord · 4 messages</b><div class="dim">Summary: build passed, team call moved to 6 pm</div></div></div>
+    <div class="n"><span class="ico"><svg class="i s14"><use href="#down"/></svg></span><div><b>12 updates ready</b><div class="dim">Includes a kernel update · Review</div></div></div>
+    <div class="n"><span class="ico"><svg class="i s14"><use href="#display"/></svg></span><div><b>Screenshot saved</b><div class="dim">Pictures/Screenshots · Copy · Open</div></div></div>
+    </div>
+  </div>
+
+  <div class="hot"><div class="handle"></div>
+    <div class="dock">
+      <b class="run" title="Files"><svg class="i"><use href="#folder"/></svg></b>
+      <b class="run" title="Terminal"><svg class="i"><use href="#term"/></svg></b>
+      <b title="Browser"><svg class="i"><use href="#globe"/></svg></b>
+      <b class="run" title="Code"><svg class="i"><use href="#code"/></svg></b>
+      <span class="sep"></span>
+      <b class="ai" title="Grace AI Studio"><svg class="i"><use href="#spark"/></svg></b>
+      <b title="Agent Hub"><svg class="i"><use href="#bot"/></svg></b>
+      <b title="Settings"><svg class="i"><use href="#gear"/></svg></b>
+    </div>
+  </div>
+</div>
+
+<h3 class="sec">2 · Settings → Appearance (controls change the desktop above)</h3>
+<div class="app">
+  <div class="tt"><span class="tl"><i></i><i></i><i></i></span><span class="title" style="color:#d6d9e1">Settings</span></div>
+  <div class="appbody">
+  <div class="side">
+    <div class="search"><svg class="i"><use href="#search"/></svg>Search settings</div>
+    <div class="it"><svg class="i"><use href="#wifi"/></svg>Wi-Fi</div>
+    <div class="it"><svg class="i"><use href="#bt"/></svg>Bluetooth</div>
+    <div class="it"><svg class="i"><use href="#display"/></svg>Displays</div>
+    <div class="it"><svg class="i"><use href="#vol"/></svg>Sound</div>
+    <div class="it"><svg class="i"><use href="#bat"/></svg>Power</div>
+    <div class="grp">Desktop</div>
+    <div class="it sel"><svg class="i"><use href="#appear"/></svg>Appearance</div>
+    <div class="it"><svg class="i"><use href="#grid"/></svg>Windows &amp; Workspaces</div>
+    <div class="it"><svg class="i"><use href="#kbd"/></svg>Keyboard &amp; Shortcuts</div>
+    <div class="grp">Intelligence</div>
+    <div class="it"><svg class="i"><use href="#spark"/></svg>AI &amp; Models</div>
+    <div class="it"><svg class="i"><use href="#bot"/></svg>Agents</div>
+    <div class="grp">System</div>
+    <div class="it"><svg class="i"><use href="#shield"/></svg>Privacy &amp; Security</div>
+    <div class="it"><svg class="i"><use href="#down"/></svg>Updates &amp; Software</div>
+    <div class="it"><svg class="i"><use href="#info"/></svg>About</div>
+  </div>
+  <div class="page">
+    <h1>Appearance</h1>
+    <p class="lead">How GraceOS looks and moves. Every option here also lives in a plain config file, if you prefer editing that.</p>
+    <div class="box"><div class="r"><p>Style</p>
+      <div class="styles">
+        <div class="sty" onclick="this.parentNode.querySelectorAll('.sty').forEach(e=>e.classList.remove('on'));this.classList.add('on')"><div style="background:linear-gradient(135deg,#f6f6f8,#dfe2ea)"></div>Light</div>
+        <div class="sty on" onclick="this.parentNode.querySelectorAll('.sty').forEach(e=>e.classList.remove('on'));this.classList.add('on')"><div style="background:linear-gradient(135deg,#2a2e3a,#14161c)"></div>Dark</div>
+      </div></div>
+      <div class="r"><p>Accent color<small>Used for toggles, sliders, primary buttons and AI icons</small></p>
+        <div class="sw">
+          <button aria-label="Blue" style="background:#3584e4" onclick="gos.style.setProperty('--accent','#3584e4')"></button>
+          <button aria-label="Teal" style="background:#2190a4" onclick="gos.style.setProperty('--accent','#2190a4')"></button>
+          <button aria-label="Green" style="background:#3a944a" onclick="gos.style.setProperty('--accent','#3a944a')"></button>
+          <button aria-label="Yellow" style="background:#c88800" onclick="gos.style.setProperty('--accent','#c88800')"></button>
+          <button aria-label="Orange" style="background:#ed5b00" onclick="gos.style.setProperty('--accent','#ed5b00')"></button>
+          <button aria-label="Red" style="background:#e62d42" onclick="gos.style.setProperty('--accent','#e62d42')"></button>
+          <button aria-label="Pink" style="background:#d56199" onclick="gos.style.setProperty('--accent','#d56199')"></button>
+          <button aria-label="Purple" style="background:#9141ac" onclick="gos.style.setProperty('--accent','#9141ac')"></button>
+          <button aria-label="Slate" style="background:#6f8396" onclick="gos.style.setProperty('--accent','#6f8396')"></button>
+        </div></div></div>
+    <div class="box">
+      <div class="r"><p>Window gaps<small>Space between windows and the screen edges</small></p>
+        <span style="display:flex;align-items:center;gap:10px"><input type="range" min="0" max="24" value="10" oninput="gos.style.setProperty('--gap',this.value+'px');this.nextElementSibling.textContent=this.value+' px'"><span class="val">10 px</span></span></div>
+      <div class="r"><p>Corner roundness</p>
+        <span style="display:flex;align-items:center;gap:10px"><input type="range" min="0" max="22" value="12" oninput="gos.style.setProperty('--radius',this.value+'px');this.nextElementSibling.textContent=this.value+' px'"><span class="val">12 px</span></span></div>
+      <div class="r"><p>Background blur<small>Frosted glass on the top bar, dock and panels</small></p>
+        <span class="toggle" onclick="this.classList.toggle('off');gos.classList.toggle('noblur')"></span></div>
+      <div class="r"><p>Window layout<small>Auto-tile arranges windows for you; Floating lets you drag them freely</small></p>
+        <span class="seg"><span class="on" onclick="[...this.parentNode.children].forEach(e=>e.classList.remove('on'));this.classList.add('on')">Auto-tile</span><span onclick="[...this.parentNode.children].forEach(e=>e.classList.remove('on'));this.classList.add('on')">Floating</span></span></div>
+    </div>
+    <div class="box">
+      <div class="r"><p>Animations<small>Follows your system's reduce-motion setting automatically</small></p>
+        <span class="seg"><span onclick="[...this.parentNode.children].forEach(e=>e.classList.remove('on'));this.classList.add('on')">Off</span><span onclick="[...this.parentNode.children].forEach(e=>e.classList.remove('on'));this.classList.add('on')">Calm</span><span class="on" onclick="[...this.parentNode.children].forEach(e=>e.classList.remove('on'));this.classList.add('on')">Smooth</span><span onclick="[...this.parentNode.children].forEach(e=>e.classList.remove('on'));this.classList.add('on')">Snappy</span></span></div>
+      <div class="r"><p>Dock</p><span class="drop">Show on bottom-edge hover<svg class="i s14 chev"><use href="#chevd"/></svg></span></div>
+    </div>
+    <div class="box">
+      <div class="r"><p>Get themes &amp; extensions<small>Browse community themes, including AUR packages, with a preview before you install</small></p><svg class="i chev"><use href="#chevr"/></svg></div>
+      <div class="r"><p>Edit config file<small>~/.config/grace/desktop.conf</small></p><svg class="i chev"><use href="#chevr"/></svg></div>
+    </div>
+  </div>
+  </div>
+</div>
+</div>
+</body></html>
