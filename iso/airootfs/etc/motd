@@ -1,0 +1,5 @@
+Welcome to GraceOS (live) - an Arch-based AI/ML developer OS. Early development build.
+
+Networking: Ethernet via DHCP automatically; Wi-Fi with iwctl.
+Dev tools preinstalled: git, python, uv, node, ripgrep, tmux, btop.
+Arch installation guide: Installation_guide (needs internet).

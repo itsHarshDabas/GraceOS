@@ -1,0 +1,18 @@
+name: build-iso
+# Manual only until boot-test.sh is proven (T-002); then add push.
+on: [workflow_dispatch]
+jobs:
+  iso:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+      options: --privileged
+    steps:
+      - run: pacman -Syu --noconfirm archiso git qemu-base edk2-ovmf
+      - uses: actions/checkout@v4
+      - run: build/check-packages.sh
+      - run: build/build-iso.sh
+      - run: build/boot-test.sh out/graceos-*.iso bios
+      - run: build/boot-test.sh out/graceos-*.iso uefi
+      - uses: actions/upload-artifact@v4
+        with: { name: graceos-iso, path: out/ }

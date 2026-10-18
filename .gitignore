@@ -1,0 +1,6 @@
+out/
+work/
+*.iso
+*.vmdk
+*.vmem
+*.lck/
