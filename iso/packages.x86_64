@@ -144,6 +144,7 @@ ripgrep
 uv
 wget
 # --- Grace Candyland desktop (the shell itself is installed from its repo at build time) ---
+adwaita-cursors
 bluez
 bluez-utils
 brightnessctl
