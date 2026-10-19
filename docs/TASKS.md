@@ -17,15 +17,15 @@ Each brief is meant to be pasted directly to a coding agent (Claude Code, OpenCo
 | T-010 | Security review of `build/` and `iso/` | review only | unassigned | todo | T-001 |
 | T-011 | Window title bars with traffic lights for every app | `grace-candyland` | unassigned | todo | T-003 |
 | T-012 | Settings pages beyond Appearance (Wi-Fi, Displays, Sound, Power, AI & Models, Agents, About) | `grace-candyland` | unassigned | todo | T-003 |
-| T-013 | Lock screen "Goodness GraceOS" and idle locking (polkit agent later) | `grace-candyland` | Harsh (Claude) | in progress | T-003 |
+| T-013 | Lock screen "Goodness GraceOS" and idle locking (polkit agent later) | `grace-candyland` | Harsh (Claude) | review (lock screen and idle locking done; polkit agent todo) | T-003 |
 | T-014 | Make `grace-candyland` public so CI can clone it | GitHub settings | Harsh | done | — |
 | T-015 | `graceinstall`: guided disk installer (archinstall + GraceOS defaults) | `installer/`, ADR 0005 | Harsh | v0 done; unattended QEMU install test in `build/install-test.py` | — |
-| T-016 | GraceOS package repo: `graceos-release` (name survives updates), `grace-candyland`, `cherrycola`, `yay` | `packages/`, GitHub Releases | Harsh (Claude) | in progress | T-015 |
+| T-016 | GraceOS package repo: `graceos-release` (name survives updates), `grace-candyland`, `cherrycola`, `yay` | `packages/`, GitHub Releases | Harsh (Claude) | review (repo live; signing todo; -Syu on an installed VM untested) | T-015 |
 | T-017 | Graphical login screen (greeter) for installed systems | `grace-candyland` or `iso/` | unassigned | todo | T-015 |
-| T-018 | CandySole: GraceOS's own terminal (GTK4 + VTE) | `grace-candyland/apps/candysole` | Harsh (OpenCode, reviewed by Claude) | in progress | — |
-| T-019 | CherryCola: local model service and CLI (Ollama default, LM Studio supported) | `services/cherrycola` | Harsh (Cline, reviewed by Claude) | in progress | — |
-| T-020 | Stock Wine (wine, wine-mono, wine-gecko, winetricks) | `iso/` | Harsh (Claude) | in progress | — |
-| T-021 | Low-end PCs: automatic lite mode, zram, and a Minimal install choice | `grace-candyland`, `iso/`, `installer/` | Harsh (Claude) | in progress | T-016 |
+| T-018 | CandySole: GraceOS's own terminal (GTK4 + VTE) | `grace-candyland/apps/candysole` | Harsh (OpenCode, fixed and reviewed by Claude) | review (works on the live ISO) | — |
+| T-019 | CherryCola: local model service and CLI (Ollama default, LM Studio supported) | `services/cherrycola` | Harsh (Cline, reviewed by Claude) | review (works on the live ISO) | — |
+| T-020 | Stock Wine (wine, wine-mono, wine-gecko, winetricks) | `iso/` | Harsh (Claude) | done (wine notepad opens on the live ISO) | — |
+| T-021 | Low-end PCs: automatic lite mode, zram, and a Minimal install choice | `grace-candyland`, `iso/`, `installer/` | Harsh (Claude) | review (lite mode, zram, Full/Minimal built; Minimal install and RAM numbers not measured) | T-016 |
 
 ---
 

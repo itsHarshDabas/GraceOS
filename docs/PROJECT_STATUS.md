@@ -71,6 +71,15 @@ _Last updated: 2026-10-19_
 - **`graceos-2026.10.19` (Adwaita cursor, candyland `31823ec`):** `verify-iso.sh` ALL CHECKS PASSED. Booted in VMware Workstation (UEFI, 3 GB, no 3D): the live session reaches the Candyland desktop in about a minute, with the plain arrow cursor.
 - **VMware with 3D acceleration on** showed only the background and cursor: Hyprland ran on the GPU, but it rejected Quickshell's GPU buffers (`wl_surface.attach` invalid arguments) and the shell exited. Candyland `2793b75` restarts the shell with software rendering when that happens, and turns off blur, shadows and animations when Hyprland itself runs in software (3D off), which was the lag. Rebuilt `graceos-2026.10.19` with it (verify-iso ALL CHECKS PASSED); a fresh boot in VMware with 3D on reaches the full desktop by itself.
 - **Terminal: Konsole replaces foot** (candyland `2025909`). It gets a Grace profile (shell colors, Fira Code, padding) with no menu bar or toolbars, and its right-click menu (Copy, Paste, Split View and more) works; foot had none. Dark Style now also switches GTK 3 and Qt apps to Adwaita-dark, which fixed Konsole's light menus. Rebuilt `graceos-2026.10.19` with it (verify-iso ALL CHECKS PASSED); on a fresh boot in VMware (3D on), Super+Return opens the Grace Konsole and its right-click menu is dark.
+- **2026-10-19 batch (ISO `graceos-2026.10.19`, 2.3 GB, verify-iso ALL CHECKS PASSED), checked on a fresh boot in VMware (3D on, 4 GB):**
+  - Package repo `[graceos]` published on the `repo-x86_64` release (graceos-release, grace-candyland, cherrycola, yay-bin); the ISO installs from it (ADR 0006).
+  - Name guard: `pacman -S filesystem` runs the hook ("Keeping the GraceOS name in os-release") and `/etc/os-release` still says GraceOS.
+  - Lock screen "Goodness GraceOS": Super+L locks; wrong password rejected with a message; right password unlocks; killing the shell while locked leaves the session locked. hypridle running.
+  - CandySole is the terminal (Super+Return): tabs, right-click menu, Grace colors; only web/mail links open.
+  - CherryCola: on-demand `ollama serve`, missing-model message (exit 3), `pull`, streamed `ask`, `status --json`; Ask Grace streams the answer. Tested with qwen3:0.6b to fit the VM (its answers are poor; real installs pick 1.7b/4b/8b by RAM).
+  - Wine: `wine notepad` opens a window. yay 13.0.1 present. zram swap 1.9 GB active.
+  - Idle RAM of the live desktop: about 1.1 GB used of 3.9 GB.
+  - Not yet checked: an install from this ISO (Full and Minimal), `pacman -Syu` from `[graceos]` on an installed system, Minimal's idle RAM, and the 3D-off lite mode on a fresh boot.
 - **Builder VM vs host memory:** the VM takes 8 GB of the host's 15.4 GB and keeps being powered off under memory pressure. Run long builds with other heavy apps closed, or lower the VM to 6 GB.
 - **Real hardware:** not tried.
 - **CI can't clone the private candyland repo** (T-014).
