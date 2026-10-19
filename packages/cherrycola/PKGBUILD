@@ -1,0 +1,25 @@
+# Maintainer: GraceOS <https://github.com/itsHarshDabas/GraceOS>
+# Packages services/cherrycola from this checkout; pkgver counts the commits that touched it.
+pkgname=cherrycola
+pkgver=r0
+pkgrel=1
+pkgdesc="CherryCola: local model inference for GraceOS (Ollama by default, LM Studio supported)"
+arch=(any)
+url=https://github.com/itsHarshDabas/GraceOS
+license=(LicenseRef-unspecified)
+depends=(python)
+optdepends=(
+  'ollama: run models on the CPU (or ollama-cuda, ollama-rocm, ollama-vulkan for a GPU)'
+)
+_src=$startdir/../../services/cherrycola
+
+pkgver() {
+  printf "r%s.%s" "$(git -C "$_src" rev-list --count HEAD -- .)" "$(git -C "$_src" log -1 --format=%h -- .)"
+}
+
+package() {
+  install -d "$pkgdir/usr/lib/cherrycola"
+  cp -r "$_src/cherrycola" "$pkgdir/usr/lib/cherrycola/"
+  find "$pkgdir/usr/lib/cherrycola" -name __pycache__ -prune -exec rm -rf {} +
+  install -Dm755 "$_src/bin/cherrycola" "$pkgdir/usr/bin/cherrycola"
+}

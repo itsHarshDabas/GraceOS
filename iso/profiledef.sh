@@ -25,9 +25,5 @@ file_permissions=(
   ["/usr/local/bin/choose-mirror"]="0:0:755"
   ["/usr/local/bin/Installation_guide"]="0:0:755"
   ["/usr/local/bin/livecd-sound"]="0:0:755"
-  ["/usr/bin/grace-candyland"]="0:0:755"
-  ["/usr/bin/grace-launch"]="0:0:755"
-  ["/usr/bin/grace-settings"]="0:0:755"
-  ["/usr/bin/grace-approve"]="0:0:755"
   ["/usr/local/bin/graceinstall"]="0:0:755"
 )

@@ -15,6 +15,7 @@ An Arch Linux-based, AI-native operating system for AI/ML developers.
 Needs a real Arch Linux environment (a VM is fine). It will not run on native Windows.
 ```
 sudo pacman -S archiso
+build/build-packages.sh        # optional: GraceOS's own packages into out/repo (else the published repo is used)
 sudo build/check-packages.sh   # verify every package in the manifest exists
 sudo build/build-iso.sh        # -> out/graceos-<date>-x86_64.iso (+ .sha256)
 sudo build/verify-iso.sh out/graceos-*.iso          # checksum, branding, symlinks, required tools
@@ -27,7 +28,17 @@ The `build-iso` GitHub Actions workflow runs the same steps in an Arch container
 Create a VM (VMware, VirtualBox, virt-manager or QEMU) with **UEFI** firmware, 4 GB of RAM, 2 or more CPUs and a 30 GB disk, and boot the ISO. The live session logs in as `grace` (no password, `sudo` works) and the desktop starts by itself in about a minute. It runs without 3D acceleration too, using software rendering. Press Super+Space to search apps, or open **Install GraceOS** there to install onto the VM's disk.
 
 ## Install GraceOS to a disk
-Boot the ISO and run `sudo graceinstall` in a terminal, or open **Install GraceOS** from Ask Grace (Super+Space). It's archinstall's guided installer with GraceOS defaults filled in (see [ADR 0005](docs/decisions/0005-graceinstall-on-archinstall.md)): pick the disk, user and password, review, and install. It wipes the disk you choose, so pick carefully. After installing, log in on the first console and the desktop starts.
+Boot the ISO and run `sudo graceinstall` in a terminal, or open **Install GraceOS** from Ask Grace (Super+Space). It's archinstall's guided installer with GraceOS defaults filled in (see [ADR 0005](docs/decisions/0005-graceinstall-on-archinstall.md)). It first asks which GraceOS:
+- **Full:** the Grace desktop, the CandySole terminal, CherryCola (local AI) and Wine.
+- **Minimal:** no desktop, AI or Wine; close to a bare Arch install, for old or small PCs.
+
+Then pick the disk, user and password, review, and install. It wipes the disk you choose, so pick carefully. After installing, log in on the first console and the desktop starts.
+
+## Using GraceOS
+- **Packages:** `sudo pacman -S <name>` from Arch's repos, `yay -S <name>` from the AUR. `sudo pacman -Syu` updates everything, GraceOS's own packages included ([ADR 0006](docs/decisions/0006-graceos-package-repo.md)), and the system keeps its GraceOS name.
+- **Local AI:** `cherrycola pull` downloads a model sized for your RAM, then ask from Ask Grace (Super+Space) or with `cherrycola ask "..."` / `cherrycola chat`. It uses Ollama by default; with LM Studio's local server running, `cherrycola backend lmstudio` uses that instead. Nothing runs or downloads until you ask.
+- **Windows apps:** `wine setup.exe`; `winetricks` for extra Windows components.
+- **Lock the screen:** Super+L.
 
 `sudo build/install-test.py out/graceos-*.iso` tests the installer end to end inside QEMU: an unattended install onto a blank virtual disk, then a boot and login with a screenshot of the desktop.
 
@@ -35,6 +46,8 @@ Boot the ISO and run `sudo graceinstall` in a terminal, or open **Install GraceO
 - `iso/`: a copy of the upstream archiso `releng` profile (commit 723da19), with GraceOS branding and a developer package block. `iso/symlinks.txt` lists the profile's symlinks, which the build recreates for Windows checkouts.
 - `build/`: build, package-check, verify, boot, desktop and installer test scripts.
 - `installer/`: `graceinstall` and its tests (`python -m pytest installer/`).
+- `packages/`: PKGBUILDs for GraceOS's own packages; `build/build-packages.sh` builds them into the `graceos` repo.
+- `services/cherrycola/`: CherryCola, the local model CLI (`python -m pytest services/cherrycola`).
 - `docs/`: status, tasks, roadmap, architecture, decisions and vision.
 
 Line endings are LF everywhere (enforced by `.gitattributes`).

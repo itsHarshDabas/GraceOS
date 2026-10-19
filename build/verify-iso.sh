@@ -35,7 +35,7 @@ for b in git python node npm uv rg fd jq btop fastfetch tmux makepkg lspci sshd;
   check "tool $b" '[[ -e $sfs/usr/bin/$b || -L $sfs/usr/bin/$b ]]'
 done
 
-for b in Hyprland qs konsole nautilus nmcli wpctl grace-candyland grace-approve; do
+for b in Hyprland qs candysole nautilus nmcli wpctl grace-candyland grace-approve cherrycola ollama yay wine winetricks; do
   check "tool $b" '[[ -e $sfs/usr/bin/$b || -L $sfs/usr/bin/$b ]]'
 done
 check "Grace Candyland session entry" '[[ -f $sfs/usr/share/wayland-sessions/grace-candyland.desktop ]]'
@@ -45,7 +45,11 @@ check "live user grace (uid 1000, wheel)" 'grep -q "^grace:x:1000:1000:" "$sfs/e
 check "tty1 autologin is grace" 'grep -q -- "--autologin grace" "$sfs/etc/systemd/system/getty@tty1.service.d/autologin.conf"'
 check "tty1 login starts the desktop" 'grep -q grace-candyland "$sfs/etc/profile.d/grace-candyland.sh"'
 check "graceinstall is executable" '[[ -x $sfs/usr/local/bin/graceinstall ]]'
-check "graceinstall package list" '[[ $(grep -c . "$sfs/usr/share/graceinstall/packages") -gt 30 ]] && grep -qx hyprland "$sfs/usr/share/graceinstall/packages"'
+check "graceinstall package list" '[[ $(grep -c . "$sfs/usr/share/graceinstall/packages") -gt 30 ]] && grep -qx grace-candyland "$sfs/usr/share/graceinstall/packages" && grep -q "\[minimal\]" "$sfs/usr/share/graceinstall/packages"'
+check "GraceOS packages installed" '(for p in graceos-release grace-candyland cherrycola yay-bin; do ls -d "$sfs/var/lib/pacman/local/$p-"[0-9r]* >/dev/null 2>&1 || exit 1; done)'
+check "os-release guard hook" '[[ -f $sfs/usr/share/libalpm/hooks/graceos-release.hook ]] && cmp -s "$sfs/usr/lib/graceos/os-release" "$sfs/usr/lib/os-release"'
+check "zram config" '[[ -f $sfs/usr/lib/systemd/zram-generator.conf ]]'
+check "lock screen" '[[ -f $sfs/usr/share/grace-candyland/shell/modules/Lock.qml && -e $sfs/usr/bin/hypridle ]]'
 check "sudoers drop-in is 0440 root" '[[ $(stat -c %a:%u "$sfs/etc/sudoers.d/10-grace-live") == 440:0 ]]'
 
 (( fails == 0 )) && echo "ALL CHECKS PASSED" || { echo "$fails check(s) failed"; exit 1; }

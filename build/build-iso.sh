@@ -4,7 +4,6 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 [[ $EUID -eq 0 ]] || { echo "run as root (mkarchiso needs it)"; exit 1; }
 command -v mkarchiso >/dev/null || { echo "install archiso: pacman -S archiso"; exit 1; }
-command -v make >/dev/null || { echo "install make: pacman -S make"; exit 1; }
 
 work=${WORK_DIR:-/var/tmp/graceos-work}
 stage=$work/profile
@@ -19,20 +18,18 @@ while IFS=$'\t' read -r path target; do
   ln -sfn "$target" "$stage/$path"
 done < iso/symlinks.txt
 
-# The desktop, Grace Candyland, lives in its own repo; install the commit pinned in iso/candyland.ref.
-# CANDYLAND_SRC=/path/to/checkout installs a local copy instead (for working on both at once).
-src=${CANDYLAND_SRC:-}
-if [[ -z $src ]]; then
-  src=$work/candyland
-  git clone -q https://github.com/itsHarshDabas/grace-candyland "$src"
-  git -C "$src" -c advice.detachedHead=false checkout -q "$(cat iso/candyland.ref)"
+# GraceOS's own packages come from the [graceos] repo in iso/pacman.conf (GitHub Releases).
+# If build/build-packages.sh has built them into out/repo, use those instead.
+if [[ -e out/repo/graceos.db ]]; then
+  sed -i "s|^Server = .*/releases/download/repo-x86_64|Server = file://$PWD/out/repo|" "$stage/pacman.conf"
+  echo "using the local GraceOS repo in out/repo"
 fi
-make -s -C "$src" install DESTDIR="$stage/airootfs" PREFIX=/usr
 
-# graceinstall installs the same GraceOS package set as this ISO (everything after the first GraceOS marker).
+# graceinstall installs the same GraceOS package sets as this ISO (everything after the first GraceOS marker,
+# with the section markers kept so it can tell the Minimal set apart).
 install -Dm755 installer/graceinstall "$stage/airootfs/usr/local/bin/graceinstall"
 mkdir -p "$stage/airootfs/usr/share/graceinstall"
-sed -n '/^# --- GraceOS/,$p' iso/packages.x86_64 | grep -v '^#' > "$stage/airootfs/usr/share/graceinstall/packages"
+sed -n '/^# --- GraceOS/,$p' iso/packages.x86_64 > "$stage/airootfs/usr/share/graceinstall/packages"
 
 mkarchiso -v -w "$work/mkarchiso" -o out "$stage"
 iso=$(ls -t out/graceos-*.iso | head -1)

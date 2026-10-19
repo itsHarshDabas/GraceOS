@@ -1,6 +1,6 @@
 # 0005: graceinstall is archinstall with GraceOS defaults
 
-- Status: accepted by Harsh, 2026-10-19.
+- Status: accepted by Harsh, 2026-10-19. Updated the same day by ADR 0006: GraceOS parts are now packages from the `graceos` repo, so the file-copy step and the archinstall patch below are gone, and graceinstall asks Full or Minimal.
 
 ## Context
 GraceOS needs an installer that feels like `archinstall`: a guided menu in the terminal that partitions a disk, creates a user and installs the system. Partitioning, encryption and bootloaders are where installers cause data loss, so we shouldn't write that part ourselves.

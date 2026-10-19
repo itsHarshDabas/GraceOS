@@ -7,26 +7,48 @@ spec = importlib.util.spec_from_loader("graceinstall", importlib.machinery.Sourc
 gi = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gi)
 
+PACKAGES = """# --- GraceOS base [minimal] ---
+git
+yay-bin
+# a comment inside a section
+# --- GraceOS desktop ---
+hyprland
 
-def test_defaults_and_user_override(tmp_path, monkeypatch):
-    (tmp_path / "packages").write_text("hyprland\n# comment\n\nfoot\n")
+# --- GraceOS AI ---
+cherrycola
+"""
+
+
+def test_package_sets():
+    full, minimal = gi.package_sets(PACKAGES)
+    assert full == ["git", "yay-bin", "hyprland", "cherrycola"]
+    assert minimal == ["git", "yay-bin"]  # a plain comment doesn't end the [minimal] section
+
+
+def test_full_with_user_override(tmp_path, monkeypatch):
+    (tmp_path / "packages").write_text(PACKAGES)
     monkeypatch.setattr(gi, "SHARE", tmp_path)
     user = tmp_path / "user.json"
-    user.write_text(json.dumps({"hostname": "box", "custom_commands": ["echo hi"]}))
+    mine = {"name": "mine", "url": "https://example.org", "sign_check": "Required", "sign_option": "TrustedOnly"}
+    user.write_text(json.dumps({"hostname": "box", "mirror_config": {"custom_repositories": [mine]}}))
 
-    config, rest = gi.merged_config(["--config", str(user), "--silent"])
+    config, rest = gi.merged_config(["--full", "--config", str(user), "--silent"])
 
-    assert config["packages"] == ["hyprland", "foot"]
+    assert config["packages"] == ["git", "yay-bin", "hyprland", "cherrycola"]
     assert config["hostname"] == "box"  # user wins
     assert config["network_config"] == {"type": "nm"}  # default kept
-    assert config["custom_commands"] == gi.GRACE_COMMANDS + ["echo hi"]  # GraceOS step always runs first
+    assert config["mirror_config"]["custom_repositories"] == [gi.GRACEOS_REPO, mine]  # GraceOS repo always kept
+    assert "app_config" in config
     assert rest == ["--silent"]
 
 
-def test_add_grace_refuses_without_live_files(tmp_path, monkeypatch):
-    monkeypatch.setattr(gi, "FROM_LIVE", ["definitely/not/here"])
-    try:
-        gi.add_grace(tmp_path)
-    except FileNotFoundError:
-        return
-    raise AssertionError("expected FileNotFoundError")
+def test_minimal_asks_and_has_no_desktop(tmp_path, monkeypatch):
+    (tmp_path / "packages").write_text(PACKAGES)
+    monkeypatch.setattr(gi, "SHARE", tmp_path)
+    monkeypatch.setattr("builtins.input", lambda _: "2")
+
+    config, rest = gi.merged_config([])
+
+    assert config["packages"] == ["git", "yay-bin"]
+    assert "app_config" not in config
+    assert config["mirror_config"]["custom_repositories"] == [gi.GRACEOS_REPO]

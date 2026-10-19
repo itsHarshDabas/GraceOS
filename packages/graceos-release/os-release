@@ -1,0 +1,9 @@
+NAME="GraceOS"
+PRETTY_NAME="GraceOS"
+ID=graceos
+ID_LIKE=arch
+BUILD_ID=rolling
+ANSI_COLOR="38;2;53;132;228"
+HOME_URL="https://github.com/itsHarshDabas/GraceOS"
+BUG_REPORT_URL="https://github.com/itsHarshDabas/GraceOS/issues"
+LOGO=archlinux-logo

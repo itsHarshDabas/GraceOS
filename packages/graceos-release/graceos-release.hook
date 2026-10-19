@@ -1,0 +1,13 @@
+# Arch's filesystem package owns /usr/lib/os-release and restores Arch's on every update;
+# put GraceOS's back right after.
+[Trigger]
+Type = Package
+Operation = Install
+Operation = Upgrade
+Target = filesystem
+Target = graceos-release
+
+[Action]
+Description = Keeping the GraceOS name in os-release...
+When = PostTransaction
+Exec = /usr/bin/install -m644 /usr/lib/graceos/os-release /usr/lib/os-release

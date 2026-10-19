@@ -1,0 +1,36 @@
+# Maintainer: GraceOS <https://github.com/itsHarshDabas/GraceOS>
+# Builds the grace-candyland commit pinned in iso/candyland.ref (build-packages.sh passes it in).
+pkgname=grace-candyland
+pkgver=r0
+pkgrel=1
+pkgdesc="The GraceOS desktop: Hyprland with the Grace shell, CandySole terminal and lock screen"
+arch=(any)
+url=https://github.com/itsHarshDabas/grace-candyland
+license=(LicenseRef-unspecified)
+depends=(hyprland quickshell qt6-svg inter-font ttf-fira-code adwaita-cursors xdg-utils hypridle
+         python-gobject gtk4 libadwaita vte4)
+optdepends=(
+  'networkmanager: Wi-Fi toggle'
+  'bluez: Bluetooth toggle'
+  'pipewire-pulse: volume slider (with wireplumber)'
+  'upower: battery status'
+  'power-profiles-daemon: Power Mode toggle'
+  'brightnessctl: brightness slider and keys'
+  'hyprsunset: Night Light'
+  'grim: screenshots (Print key)'
+  'libnotify: screenshot notification'
+  'xdg-desktop-portal-hyprland: screen sharing and file pickers'
+  'cherrycola: Ask Grace answers from a local model'
+)
+makedepends=(git make)
+source=("git+$url.git#commit=${CANDYLAND_COMMIT:?set CANDYLAND_COMMIT}")
+sha256sums=(SKIP)
+
+pkgver() {
+  cd grace-candyland
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+}
+
+package() {
+  make -C grace-candyland install DESTDIR="$pkgdir" PREFIX=/usr
+}

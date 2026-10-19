@@ -127,13 +127,14 @@ xdg-utils
 xfsprogs
 xl2tpd
 zsh
-# --- GraceOS developer base (official repos only) ---
+# --- GraceOS base [minimal]: every install, Minimal included (graceinstall reads these markers) ---
 base-devel
 btop
 curl
 fastfetch
 fd
 git
+graceos-release
 jq
 nodejs
 npm
@@ -143,26 +144,30 @@ python-pip
 ripgrep
 uv
 wget
-# --- Grace Candyland desktop (the shell itself is installed from its repo at build time) ---
-adwaita-cursors
+yay-bin
+zram-generator
+# --- GraceOS desktop: Grace Candyland (from the graceos repo) and what its controls use ---
 bluez
 bluez-utils
 brightnessctl
+grace-candyland
 grim
-hyprland
 hyprsunset
-inter-font
-konsole
 libnotify
 nautilus
 networkmanager
 pipewire
 pipewire-pulse
 power-profiles-daemon
-quickshell
-ttf-fira-code
 upower
 wireplumber
 xdg-desktop-portal-hyprland
 xdg-user-dirs
-xdg-utils
+# --- GraceOS AI: CherryCola runs models through Ollama, started on demand ---
+cherrycola
+ollama
+# --- GraceOS Windows apps ---
+wine
+wine-gecko
+wine-mono
+winetricks

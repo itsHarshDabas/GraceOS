@@ -17,11 +17,15 @@ Each brief is meant to be pasted directly to a coding agent (Claude Code, OpenCo
 | T-010 | Security review of `build/` and `iso/` | review only | unassigned | todo | T-001 |
 | T-011 | Window title bars with traffic lights for every app | `grace-candyland` | unassigned | todo | T-003 |
 | T-012 | Settings pages beyond Appearance (Wi-Fi, Displays, Sound, Power, AI & Models, Agents, About) | `grace-candyland` | unassigned | todo | T-003 |
-| T-013 | Lock screen, idle handling and a polkit agent in the shell | `grace-candyland` | unassigned | todo | T-003 |
-| T-014 | Make `grace-candyland` public so CI can clone it | GitHub settings | Harsh (owner decision) | todo | — |
+| T-013 | Lock screen "Goodness GraceOS" and idle locking (polkit agent later) | `grace-candyland` | Harsh (Claude) | in progress | T-003 |
+| T-014 | Make `grace-candyland` public so CI can clone it | GitHub settings | Harsh | done | — |
 | T-015 | `graceinstall`: guided disk installer (archinstall + GraceOS defaults) | `installer/`, ADR 0005 | Harsh | v0 done; unattended QEMU install test in `build/install-test.py` | — |
-| T-016 | GraceOS package repo with `grace-candyland` and `graceos-release` packages | new repo / GitHub Releases | unassigned | todo | T-015 |
+| T-016 | GraceOS package repo: `graceos-release` (name survives updates), `grace-candyland`, `cherrycola`, `yay` | `packages/`, GitHub Releases | Harsh (Claude) | in progress | T-015 |
 | T-017 | Graphical login screen (greeter) for installed systems | `grace-candyland` or `iso/` | unassigned | todo | T-015 |
+| T-018 | CandySole: GraceOS's own terminal (GTK4 + VTE) | `grace-candyland/apps/candysole` | Harsh (OpenCode, reviewed by Claude) | in progress | — |
+| T-019 | CherryCola: local model service and CLI (Ollama default, LM Studio supported) | `services/cherrycola` | Harsh (Cline, reviewed by Claude) | in progress | — |
+| T-020 | Stock Wine (wine, wine-mono, wine-gecko, winetricks) | `iso/` | Harsh (Claude) | in progress | — |
+| T-021 | Low-end PCs: automatic lite mode, zram, and a Minimal install choice | `grace-candyland`, `iso/`, `installer/` | Harsh (Claude) | in progress | T-016 |
 
 ---
 
@@ -76,3 +80,18 @@ Each listed page gets real controls backed by the system (NetworkManager, PipeWi
 
 ### T-016 — GraceOS package repo
 Installed systems get Grace Candyland and the GraceOS `os-release` by file copy (ADR 0005), so `pacman -Syu` doesn't update the first and an update of `filesystem` reverts the second. Build `grace-candyland` and `graceos-release` (provides `/usr/lib/os-release`, conflicts handled the way other Arch-based distros do) as packages, publish a signed repo (GitHub Releases is fine to start), add it to the ISO's and the installed system's `pacman.conf`, and switch `graceinstall` from copying files to installing packages. Acceptance: on an installed VM, `pacman -Syu` updates `grace-candyland` from the repo and `/usr/lib/os-release` still says GraceOS.
+
+### T-013 — Lock screen
+Quickshell `WlSessionLock` + `PamContext` (the `login` PAM stack). The lock surface shows the time, the date, **Goodness GraceOS**, the user, a password field and PAM's messages. Super+L locks, `hypridle` locks after 10 minutes idle and before suspend. Acceptance: in an Arch VM, Super+L locks every screen, a wrong password is rejected with a message, the right one unlocks, and killing the shell while locked leaves the session locked (the compositor's lock is not released).
+
+### T-018 — CandySole
+A GTK4 + libadwaita + VTE terminal in Python, installed by grace-candyland. Tabs, a right-click menu (Copy, Paste, Select All, New Tab, New Window, Open in Files, zoom), the usual Ctrl+Shift shortcuts, clickable links, Grace colors and Fira Code, `-e CMD` and `--working-directory`. It replaces Konsole as the default terminal. Acceptance: runs on Hyprland in an Arch VM with and without 3D, screenshot with a right-click menu open.
+
+### T-019 — CherryCola
+`cherrycola` talks to Ollama (default) or LM Studio's local server, stdlib-only Python. `ask`, `chat`, `status [--json]`, `models`, `pull [MODEL]`, `use MODEL`, `start`/`stop` (a per-user `ollama serve`, started on demand, never at boot). The default model is picked from RAM and only downloaded when the user runs `pull`. Ask Grace sends questions to it and the Local AI card shows its status. Acceptance: tests against fake Ollama and LM Studio servers pass with no network; on the live ISO, `cherrycola pull` then `cherrycola ask` answers.
+
+### T-020 — Wine
+`wine`, `wine-mono`, `wine-gecko` and `winetricks` from `extra` (Wine is WoW64 now, so no multilib). Acceptance: on the live ISO, `wine notepad` opens a window.
+
+### T-021 — Low-end PCs
+Lite mode turns off blur, shadows and animations automatically when there's no GPU or less than 4 GB of RAM. zram swap by default. `graceinstall` asks Full or Minimal; Minimal installs no desktop, CherryCola or Wine. Acceptance: idle RAM of the live desktop and of a Minimal install measured and recorded in PROJECT_STATUS.
