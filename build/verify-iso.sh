@@ -47,7 +47,8 @@ check "tty1 login starts the desktop" 'grep -q grace-candyland "$sfs/etc/profile
 check "graceinstall is executable" '[[ -x $sfs/usr/local/bin/graceinstall ]]'
 check "graceinstall package list" '[[ $(grep -c . "$sfs/usr/share/graceinstall/packages") -gt 30 ]] && grep -qx grace-candyland "$sfs/usr/share/graceinstall/packages" && grep -q "\[minimal\]" "$sfs/usr/share/graceinstall/packages"'
 check "GraceOS packages installed" '(for p in graceos-release grace-candyland cherrycola yay-bin; do ls -d "$sfs/var/lib/pacman/local/$p-"[0-9r]* >/dev/null 2>&1 || exit 1; done)'
-check "os-release guard hook" '[[ -f $sfs/usr/share/libalpm/hooks/graceos-release.hook ]] && cmp -s "$sfs/usr/lib/graceos/os-release" "$sfs/usr/lib/os-release"'
+# The hook put GraceOS's os-release in place; archiso then appends IMAGE_ID/IMAGE_VERSION, so compare the start.
+check "os-release guard hook" '[[ -f $sfs/usr/share/libalpm/hooks/graceos-release.hook ]] && head -c "$(stat -c %s "$sfs/usr/lib/graceos/os-release")" "$sfs/usr/lib/os-release" | cmp -s - "$sfs/usr/lib/graceos/os-release"'
 check "zram config" '[[ -f $sfs/usr/lib/systemd/zram-generator.conf ]]'
 check "lock screen" '[[ -f $sfs/usr/share/grace-candyland/shell/modules/Lock.qml && -e $sfs/usr/bin/hypridle ]]'
 check "sudoers drop-in is 0440 root" '[[ $(stat -c %a:%u "$sfs/etc/sudoers.d/10-grace-live") == 440:0 ]]'
