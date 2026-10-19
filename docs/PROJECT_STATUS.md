@@ -68,7 +68,7 @@ _Last updated: 2026-10-19_
 - **Live desktop** (`desktop-test.sh`, QEMU without KVM, standard VGA): after an unattended boot the screen shows Grace Candyland with the top bar, wallpaper and dock handle, and the tray shows Wi-Fi connected. Screenshot: [docs/screenshots/live-desktop-qemu.png](screenshots/live-desktop-qemu.png).
 
 ### Not done or unverified
-- **The ISO with the Adwaita cursor setting** has not been rebuilt yet: the builder VM was hard powered off mid-build while the host was low on memory (it also happened twice earlier). The screenshots above predate the change, but already show a plain arrow, because `nautilus` pulls in the Adwaita cursors.
+- **`graceos-2026.10.19` (Adwaita cursor, candyland `31823ec`):** `verify-iso.sh` ALL CHECKS PASSED. Booted in VMware Workstation (UEFI, 3 GB, no 3D): the live session reaches the Candyland desktop in about a minute, with the plain arrow cursor.
 - **Builder VM vs host memory:** the VM takes 8 GB of the host's 15.4 GB and keeps being powered off under memory pressure. Run long builds with other heavy apps closed, or lower the VM to 6 GB.
 - **Real hardware:** not tried.
 - **CI can't clone the private candyland repo** (T-014).
