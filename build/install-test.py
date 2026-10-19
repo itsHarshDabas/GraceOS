@@ -7,6 +7,7 @@
    saves a screenshot, which should show the Grace Candyland desktop.
 
 usage: sudo build/install-test.py out/graceos-*.iso [workdir=/var/tmp/graceos-install-test]
+       BOOT_ONLY=1 ... reruns only step 3 on the disk from the last run.
 Without /dev/kvm (TCG) this takes a long time: the install alone can run for over an hour.
 """
 
@@ -28,7 +29,7 @@ OVMF_VARS = "/usr/share/edk2/x64/OVMF_VARS.4m.fd"
 
 
 def size(unit, value):
-    return {"sector_size": None, "unit": unit, "value": value}
+    return {"sector_size": {"value": 512, "unit": "B"}, "unit": unit, "value": value}
 
 
 def part(mountpoint, fs, start, length, flags=()):
@@ -41,7 +42,7 @@ CONFIG = {
     "disk_config": {"config_type": "default_layout", "device_modifications": [{
         "device": "/dev/vda", "wipe": True, "partitions": [
             part("/boot", "fat32", size("MiB", 1), size("MiB", 1024), ["boot", "esp"]),
-            part("/", "ext4", size("MiB", 1025), size("Percent", 100)),
+            part("/", "ext4", size("MiB", 1025), size("GiB", 22)),  # on a 24 GB disk
         ]}]},
     "bootloader_config": {"bootloader": "Systemd-boot", "uki": False, "removable": True},
     "users": [{"username": USER, "!password": PASSWORD, "sudo": True}],
@@ -111,6 +112,8 @@ def qemu(work, *extra):
 def main():
     iso = Path(sys.argv[1]).resolve()
     work = Path(sys.argv[2] if len(sys.argv) > 2 else "/var/tmp/graceos-install-test")
+    if os.environ.get("BOOT_ONLY"):  # rerun phase 2 on the disk a previous run installed
+        return boot_installed(work)
     shutil.rmtree(work, ignore_errors=True)
     work.mkdir(parents=True)
     subprocess.run(["qemu-img", "create", "-q", "-f", "qcow2", str(work / "disk.qcow2"), "24G"], check=True)
@@ -128,7 +131,8 @@ def main():
     cmdline = options.split(None, 1)[1] + " console=ttyS0,115200"
 
     print("== phase 1: install", flush=True)
-    vm = qemu(work, "-cdrom", str(iso), "-kernel", str(work / "vmlinuz-linux"), "-initrd", str(work / "initramfs-linux.img"),
+    # The ISO goes in as a read-only virtio disk (vdb): this QEMU setup shows no CD drive to the kernel.
+    vm = qemu(work, "-drive", f"file={iso},if=virtio,format=raw,readonly=on", "-kernel", str(work / "vmlinuz-linux"), "-initrd", str(work / "initramfs-linux.img"),
               "-append", cmdline, "-serial", f"unix:{work / 'serial'},server,nowait")
     con = Serial(str(work / "serial"))
     con.expect("login:", 1800)
@@ -142,11 +146,19 @@ def main():
     con.send("tail -n 25 /root/gi.log; echo __TAIL_$((40+2))__")
     con.expect("__TAIL_42__", 120)
     con.send("poweroff")
-    vm.wait(600)
+    try:
+        vm.wait(600)
+    except subprocess.TimeoutExpired:  # shutdown under emulation can stall; the installer already synced the disk
+        monitor(str(work / "mon"), "quit")
+        vm.wait(60)
     print(f"\n== graceinstall exit status: {rc}", flush=True)
     if rc != "0":
         sys.exit(1)
 
+    boot_installed(work)
+
+
+def boot_installed(work):
     print("== phase 2: boot the installed system and log in on tty1", flush=True)
     vm = qemu(work)
     time.sleep(int(os.environ.get("BOOT_WAIT", 420)))
