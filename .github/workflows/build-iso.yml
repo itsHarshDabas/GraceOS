@@ -3,9 +3,9 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['iso/**', 'build/**', '.github/workflows/build-iso.yml']
+    paths: ['iso/**', 'build/**', 'packages/**', 'services/cherrycola/**', '.github/workflows/build-iso.yml']
   pull_request:
-    paths: ['iso/**', 'build/**', '.github/workflows/build-iso.yml']
+    paths: ['iso/**', 'build/**', 'packages/**', 'services/cherrycola/**', '.github/workflows/build-iso.yml']
 jobs:
   iso:
     runs-on: ubuntu-latest
@@ -14,8 +14,11 @@ jobs:
       image: archlinux:latest
       options: --privileged
     steps:
-      - run: pacman -Syu --noconfirm archiso git qemu-base edk2-ovmf
+      - run: pacman -Syu --noconfirm archiso git qemu-base edk2-ovmf base-devel make python
       - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }  # package versions count commits
+      # Build GraceOS's own packages here too, so the ISO never waits on the published repo.
+      - run: useradd -m builder && chown -R builder . && su builder -c 'git config --global --add safe.directory "*" && build/build-packages.sh'
       - run: build/check-packages.sh
       - run: build/build-iso.sh
       - run: build/verify-iso.sh out/graceos-*.iso
