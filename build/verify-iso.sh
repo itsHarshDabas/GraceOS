@@ -35,7 +35,7 @@ for b in git python node npm uv rg fd jq btop fastfetch tmux makepkg lspci sshd;
   check "tool $b" '[[ -e $sfs/usr/bin/$b || -L $sfs/usr/bin/$b ]]'
 done
 
-for b in Hyprland qs foot nautilus nmcli wpctl grace-candyland grace-approve; do
+for b in Hyprland qs konsole nautilus nmcli wpctl grace-candyland grace-approve; do
   check "tool $b" '[[ -e $sfs/usr/bin/$b || -L $sfs/usr/bin/$b ]]'
 done
 check "Grace Candyland session entry" '[[ -f $sfs/usr/share/wayland-sessions/grace-candyland.desktop ]]'
