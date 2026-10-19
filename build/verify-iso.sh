@@ -21,6 +21,7 @@ check "UEFI boot entries say GraceOS" 'grep -q "^title *GraceOS" "$mnt"/loader/e
 check "BIOS boot menu says GraceOS" 'grep -q "MENU LABEL GraceOS" "$mnt"/boot/syslinux/archiso_sys-linux.cfg'
 check "no leftover Arch install-medium titles" '! grep -rqs "Arch Linux install medium" "$mnt/loader" "$mnt/boot/syslinux"'
 check "hostname is graceos" '[[ $(cat "$sfs/etc/hostname") == graceos ]]'
+check "os-release says GraceOS (ID_LIKE=arch)" 'grep -q "^NAME=\"GraceOS\"" "$sfs/usr/lib/os-release" && grep -q "^ID_LIKE=arch" "$sfs/usr/lib/os-release"'
 check "GraceOS MOTD" 'grep -q GraceOS "$sfs/etc/motd"'
 
 while IFS=$'\t' read -r path target; do
@@ -33,5 +34,18 @@ done < iso/symlinks.txt
 for b in git python node npm uv rg fd jq btop fastfetch tmux makepkg lspci sshd; do
   check "tool $b" '[[ -e $sfs/usr/bin/$b || -L $sfs/usr/bin/$b ]]'
 done
+
+for b in Hyprland qs foot nautilus nmcli wpctl grace-candyland grace-approve; do
+  check "tool $b" '[[ -e $sfs/usr/bin/$b || -L $sfs/usr/bin/$b ]]'
+done
+check "Grace Candyland session entry" '[[ -f $sfs/usr/share/wayland-sessions/grace-candyland.desktop ]]'
+check "Grace shell installed" '[[ -f $sfs/usr/share/grace-candyland/shell/shell.qml ]]'
+check "grace-* commands are executable" '[[ -x $sfs/usr/bin/grace-candyland && -x $sfs/usr/bin/grace-approve && -x $sfs/usr/bin/grace-launch && -x $sfs/usr/bin/grace-settings ]]'
+check "live user grace (uid 1000, wheel)" 'grep -q "^grace:x:1000:1000:" "$sfs/etc/passwd" && grep -q "^wheel:.*grace" "$sfs/etc/group"'
+check "tty1 autologin is grace" 'grep -q -- "--autologin grace" "$sfs/etc/systemd/system/getty@tty1.service.d/autologin.conf"'
+check "tty1 login starts the desktop" 'grep -q grace-candyland "$sfs/etc/profile.d/grace-candyland.sh"'
+check "graceinstall is executable" '[[ -x $sfs/usr/local/bin/graceinstall ]]'
+check "graceinstall package list" '[[ $(grep -c . "$sfs/usr/share/graceinstall/packages") -gt 30 ]] && grep -qx hyprland "$sfs/usr/share/graceinstall/packages"'
+check "sudoers drop-in is 0440 root" '[[ $(stat -c %a:%u "$sfs/etc/sudoers.d/10-grace-live") == 440:0 ]]'
 
 (( fails == 0 )) && echo "ALL CHECKS PASSED" || { echo "$fails check(s) failed"; exit 1; }

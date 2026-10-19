@@ -4,7 +4,7 @@ _Last updated: 2026-10-19_
 
 ## Team
 - **Harsh** (itsHarshDabas): base and ISO, AI platform, overall integration. Works with Claude Code, OpenCode and Cline.
-- **Shell lead** (collaborator): Grace Shell (`desktop/`). Uses the same agents.
+- **Shell lead** (collaborator): Grace Shell. A v0 was built at Harsh's request in the `grace-candyland` repo (ADR 0004) for the Shell lead to review. Uses the same agents.
 - Task ownership is tracked in [TASKS.md](TASKS.md).
 
 ## Phase 1: bootable ISO (in progress)
@@ -51,6 +51,27 @@ _Last updated: 2026-10-19_
 - Only VMware has been tested; no real hardware yet.
 - The CI workflow has not run on GitHub yet. Runner disk space and KVM availability are unconfirmed; the boot test falls back to TCG.
 - No LICENSE yet; that's the owner's decision (T-009).
+
+## Phase 2: desktop, Grace Candyland (in progress, branch `shell/candyland`)
+
+### Implemented
+- Repo `itsHarshDabas/grace-candyland` (private for now, T-014): Hyprland config plus a Quickshell shell with the top bar, control center, Ask Grace launcher, dock, notifications, agent approvals (`grace-approve`) and Settings → Appearance. It has `make install` and an Arch PKGBUILD.
+- The ISO installs it from the commit in `iso/candyland.ref`.
+- The `grace` live user autologins on tty1 and starts the desktop.
+- NetworkManager and BlueZ replace systemd-networkd and iwd.
+
+### Tested (2026-10-19)
+- **Shell in a real Hyprland 0.56.2 session** (builder VM, software rendering because VMware 3D is off): every module checked with screenshots. `tests/approve.sh` passes (allow → 0, deny → 1, no shell → 2), and `make check` (shellcheck plus `Hyprland --verify-config`) passes.
+- **ISO** `graceos-2026.10.19-x86_64.iso` (2.1 GB, up from 1.7 GB before the desktop): `verify-iso.sh` ALL CHECKS PASSED. That covers the desktop files, the live user, autologin, the GraceOS `os-release`, and `graceinstall` with its package list.
+- **Boot tests:** BIOS PASS (sshd after 96 s) and UEFI PASS (sshd after 95 s). This shows networking comes up under NetworkManager.
+- **`graceinstall` end to end** (`build/install-test.py`, QEMU without KVM): an unattended install onto a blank 24 GB UEFI disk ended with archinstall's "Installation completed without any errors", including the GraceOS step. It wrote 5.4 GB in about 20 minutes. The installed disk then boots by itself to the console login, which reads "GraceOS … graceos login:". Screenshot: [docs/screenshots/installed-login-qemu.png](screenshots/installed-login-qemu.png). Logging in there as the installed user starts the Grace Candyland desktop: [docs/screenshots/installed-desktop-qemu.png](screenshots/installed-desktop-qemu.png).
+- **Live desktop** (`desktop-test.sh`, QEMU without KVM, standard VGA): after an unattended boot the screen shows Grace Candyland with the top bar, wallpaper and dock handle, and the tray shows Wi-Fi connected. Screenshot: [docs/screenshots/live-desktop-qemu.png](screenshots/live-desktop-qemu.png).
+
+### Not done or unverified
+- **The ISO with the Adwaita cursor setting** has not been rebuilt yet: the builder VM was hard powered off mid-build while the host was low on memory (it also happened twice earlier). The screenshots above predate the change, but already show a plain arrow, because `nautilus` pulls in the Adwaita cursors.
+- **Builder VM vs host memory:** the VM takes 8 GB of the host's 15.4 GB and keeps being powered off under memory pressure. Run long builds with other heavy apps closed, or lower the VM to 6 GB.
+- **Real hardware:** not tried.
+- **CI can't clone the private candyland repo** (T-014).
 
 ## Build environment (how Harsh builds on Windows)
 - Host: Windows 11, 15.4 GB RAM. No WSL or docker. VirtualBox is unusable (the VBoxSDS service is disabled).

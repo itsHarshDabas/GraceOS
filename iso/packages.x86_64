@@ -143,3 +143,26 @@ python-pip
 ripgrep
 uv
 wget
+# --- Grace Candyland desktop (the shell itself is installed from its repo at build time) ---
+adwaita-cursors
+bluez
+bluez-utils
+brightnessctl
+foot
+grim
+hyprland
+hyprsunset
+inter-font
+libnotify
+nautilus
+networkmanager
+pipewire
+pipewire-pulse
+power-profiles-daemon
+quickshell
+ttf-fira-code
+upower
+wireplumber
+xdg-desktop-portal-hyprland
+xdg-user-dirs
+xdg-utils

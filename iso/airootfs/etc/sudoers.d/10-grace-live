@@ -1,0 +1,2 @@
+# Live session only: the "grace" user can use sudo without a password, like root on the Arch ISO.
+grace ALL=(ALL:ALL) NOPASSWD: ALL
