@@ -15,6 +15,7 @@ for dir in packages/*/; do
   (cd "$dir" && PKGDEST="$repo" makepkg -fd --cleanbuild --noconfirm)
 done
 
+rm -f "$repo"/*-debug-*.pkg.tar.zst  # makepkg's default debug split; nobody needs it
 repo-add -q "$repo/graceos.db.tar.gz" "$repo"/*.pkg.tar.zst
 # repo-add makes graceos.db and graceos.files symlinks; release assets can't be links.
 for f in graceos.db graceos.files; do cp --remove-destination "$(readlink -f "$repo/$f")" "$repo/$f"; done
