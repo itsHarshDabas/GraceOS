@@ -69,7 +69,7 @@ _Last updated: 2026-10-19_
 
 ### Not done or unverified
 - **`graceos-2026.10.19` (Adwaita cursor, candyland `31823ec`):** `verify-iso.sh` ALL CHECKS PASSED. Booted in VMware Workstation (UEFI, 3 GB, no 3D): the live session reaches the Candyland desktop in about a minute, with the plain arrow cursor.
-- **VMware with 3D acceleration on** showed only the background and cursor: Hyprland ran on the GPU, but it rejected Quickshell's GPU buffers (`wl_surface.attach` invalid arguments) and the shell exited. Candyland `2793b75` restarts the shell with software rendering when that happens, and turns off blur, shadows and animations when Hyprland itself runs in software (3D off), which was the lag. Checked by patching the files in a running VM with 3D on; the ISO isn't rebuilt with it yet.
+- **VMware with 3D acceleration on** showed only the background and cursor: Hyprland ran on the GPU, but it rejected Quickshell's GPU buffers (`wl_surface.attach` invalid arguments) and the shell exited. Candyland `2793b75` restarts the shell with software rendering when that happens, and turns off blur, shadows and animations when Hyprland itself runs in software (3D off), which was the lag. Rebuilt `graceos-2026.10.19` with it (verify-iso ALL CHECKS PASSED); a fresh boot in VMware with 3D on reaches the full desktop by itself.
 - **Builder VM vs host memory:** the VM takes 8 GB of the host's 15.4 GB and keeps being powered off under memory pressure. Run long builds with other heavy apps closed, or lower the VM to 6 GB.
 - **Real hardware:** not tried.
 - **CI can't clone the private candyland repo** (T-014).
