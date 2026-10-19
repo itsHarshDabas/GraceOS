@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+"""graceinstall: install GraceOS to a disk.
+
+It is archinstall's guided installer (the same menus: disk, user, password, locale and so on)
+with GraceOS defaults filled in, plus one GraceOS step at the end that adds the Grace Candyland
+desktop and GraceOS branding from this live system. archinstall's options still work, for
+example --config (merged over the GraceOS defaults), --creds and --silent.
+"""
+
+import json
+import shutil
+import sys
+import tempfile
+from pathlib import Path
+
+SHARE = Path("/usr/share/graceinstall")
+
+# Files that come from the live ISO rather than from the Arch repos.
+# shortcut: copied without pacman tracking them; move them into grace-candyland and
+# graceos-release packages once GraceOS has its own package repo.
+FROM_LIVE = [
+    "usr/share/grace-candyland",
+    "usr/bin/grace-candyland",
+    "usr/bin/grace-launch",
+    "usr/bin/grace-settings",
+    "usr/bin/grace-approve",
+    "usr/share/wayland-sessions/grace-candyland.desktop",
+    "usr/share/applications/grace-settings.desktop",
+    "usr/share/icons/hicolor/scalable/apps/grace-settings.svg",
+    "usr/lib/os-release",
+    "etc/profile.d/grace-candyland.sh",
+]
+
+# Run inside the new system right after the files above are copied in.
+GRACE_COMMANDS = ["gtk-update-icon-cache -qtf /usr/share/icons/hicolor || true"]
+
+
+def defaults() -> dict:
+    packages = [p.strip() for p in (SHARE / "packages").read_text().splitlines() if p.strip() and not p.startswith("#")]
+    return {
+        "hostname": "graceos",
+        "network_config": {"type": "nm"},
+        "app_config": {"audio_config": {"audio": "pipewire"}, "bluetooth_config": {"enabled": True}},
+        "packages": packages,
+        "timezone": "UTC",
+        "custom_commands": [],
+    }
+
+
+def merged_config(args: list[str]) -> tuple[dict, list[str]]:
+    """GraceOS defaults, overridden by a user --config if given. Returns (config, remaining args)."""
+    config = defaults()
+    if "--config" in args:
+        i = args.index("--config")
+        if i + 1 >= len(args):
+            sys.exit("graceinstall: --config needs a file")
+        config.update(json.loads(Path(args[i + 1]).read_text()))
+        args = args[:i] + args[i + 2:]
+    # Ours first: the GraceOS step hooks the custom-command phase, so it must never be empty.
+    config["custom_commands"] = GRACE_COMMANDS + list(config.get("custom_commands") or [])
+    return config, args
+
+
+def add_grace(target: Path) -> None:
+    for rel in FROM_LIVE:
+        src, dst = Path("/") / rel, target / rel
+        if src.is_dir():
+            shutil.copytree(src, dst, dirs_exist_ok=True)
+        elif src.is_file():
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, dst)
+        else:
+            raise FileNotFoundError(f"graceinstall: {src} is missing from the live system; is this the GraceOS ISO?")
+
+
+def main() -> int:
+    config, args = merged_config(sys.argv[1:])
+    fd, path = tempfile.mkstemp(prefix="graceinstall-", suffix=".json")
+    with open(fd, "w") as f:
+        json.dump(config, f)
+    sys.argv = ["archinstall", "--config", path, "--skip-version-check", *args]
+
+    # archinstall runs the guided script by importing it, so patching the module here is enough.
+    from archinstall.scripts import guided
+
+    run_custom = guided.run_custom_user_commands
+
+    def grace_step(commands, installation):
+        add_grace(Path(installation.target))
+        run_custom(commands, installation)
+
+    guided.run_custom_user_commands = grace_step
+
+    from archinstall.main import main as archinstall_main
+
+    return archinstall_main()
+
+
+if __name__ == "__main__":
+    sys.exit(main())

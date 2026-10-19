@@ -4,3 +4,4 @@ work/
 *.vmdk
 *.vmem
 *.lck/
+__pycache__/

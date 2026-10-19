@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Install GraceOS
+Comment=Install GraceOS to a disk
+Exec=foot sudo graceinstall
+Icon=system-software-install
+Type=Application
+Categories=System;

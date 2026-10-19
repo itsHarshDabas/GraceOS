@@ -29,4 +29,5 @@ file_permissions=(
   ["/usr/bin/grace-launch"]="0:0:755"
   ["/usr/bin/grace-settings"]="0:0:755"
   ["/usr/bin/grace-approve"]="0:0:755"
+  ["/usr/local/bin/graceinstall"]="0:0:755"
 )

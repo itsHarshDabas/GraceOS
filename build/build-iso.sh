@@ -29,6 +29,11 @@ if [[ -z $src ]]; then
 fi
 make -s -C "$src" install DESTDIR="$stage/airootfs" PREFIX=/usr
 
+# graceinstall installs the same GraceOS package set as this ISO (everything after the first GraceOS marker).
+install -Dm755 installer/graceinstall "$stage/airootfs/usr/local/bin/graceinstall"
+mkdir -p "$stage/airootfs/usr/share/graceinstall"
+sed -n '/^# --- GraceOS/,$p' iso/packages.x86_64 | grep -v '^#' > "$stage/airootfs/usr/share/graceinstall/packages"
+
 mkarchiso -v -w "$work/mkarchiso" -o out "$stage"
 iso=$(ls -t out/graceos-*.iso | head -1)
 ( cd out && sha256sum "$(basename "$iso")" > "$(basename "$iso").sha256" )

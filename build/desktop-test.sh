@@ -15,7 +15,7 @@ sleep "$wait"
 python3 - "$mon" "$png" <<'EOF'
 import socket, sys, time
 s = socket.socket(socket.AF_UNIX); s.connect(sys.argv[1])
-for cmd in (f"screendump -f png {sys.argv[2]}", "quit"):
+for cmd in (f"screendump {sys.argv[2]} -f png", "quit"):
     s.sendall(cmd.encode() + b"\n"); time.sleep(2)
 EOF
 [[ -s $png ]] && echo "screenshot: $png" || { echo "no screenshot taken"; exit 1; }

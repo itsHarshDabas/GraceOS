@@ -19,6 +19,9 @@ Each brief is meant to be pasted directly to a coding agent (Claude Code, OpenCo
 | T-012 | Settings pages beyond Appearance (Wi-Fi, Displays, Sound, Power, AI & Models, Agents, About) | `grace-candyland` | unassigned | todo | T-003 |
 | T-013 | Lock screen, idle handling and a polkit agent in the shell | `grace-candyland` | unassigned | todo | T-003 |
 | T-014 | Make `grace-candyland` public so CI can clone it | GitHub settings | Harsh (owner decision) | todo | — |
+| T-015 | `graceinstall`: guided disk installer (archinstall + GraceOS defaults) | `installer/`, ADR 0005 | Harsh | v0 done; unattended QEMU install test in `build/install-test.py` | — |
+| T-016 | GraceOS package repo with `grace-candyland` and `graceos-release` packages | new repo / GitHub Releases | unassigned | todo | T-015 |
+| T-017 | Graphical login screen (greeter) for installed systems | `grace-candyland` or `iso/` | unassigned | todo | T-015 |
 
 ---
 
@@ -70,3 +73,6 @@ Hyprland draws no server-side decorations, so only apps with their own title bar
 
 ### T-012 — Settings pages
 Each listed page gets real controls backed by the system (NetworkManager, PipeWire, UPower, the model manager, Agent Hub), and every option maps to a documented key or system setting. Appearance is the reference for layout and behaviour.
+
+### T-016 — GraceOS package repo
+Installed systems get Grace Candyland and the GraceOS `os-release` by file copy (ADR 0005), so `pacman -Syu` doesn't update the first and an update of `filesystem` reverts the second. Build `grace-candyland` and `graceos-release` (provides `/usr/lib/os-release`, conflicts handled the way other Arch-based distros do) as packages, publish a signed repo (GitHub Releases is fine to start), add it to the ISO's and the installed system's `pacman.conf`, and switch `graceinstall` from copying files to installing packages. Acceptance: on an installed VM, `pacman -Syu` updates `grace-candyland` from the repo and `/usr/lib/os-release` still says GraceOS.
