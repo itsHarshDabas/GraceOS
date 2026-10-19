@@ -2,7 +2,7 @@
 
 An Arch Linux-based, AI-native operating system for AI/ML developers.
 
-**Status: early.** The live ISO boots into the GraceOS desktop, [Grace Candyland](https://github.com/itsHarshDabas/grace-candyland) (Hyprland with a Quickshell shell, see [ADR 0004](docs/decisions/0004-grace-candyland-desktop.md)). Nothing here is a finished feature. See [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) for what has actually been built and tested.
+**Status: early.** The live ISO is set up to start the GraceOS desktop, [Grace Candyland](https://github.com/itsHarshDabas/grace-candyland) (Hyprland with a Quickshell shell, see [ADR 0004](docs/decisions/0004-grace-candyland-desktop.md)). Nothing here is a finished feature. See [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) for what has actually been built and tested.
 
 ## Start here
 - [AGENTS.md](AGENTS.md): rules for humans and coding agents (Claude Code, OpenCode, Cline).

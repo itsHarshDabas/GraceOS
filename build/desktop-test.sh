@@ -9,7 +9,7 @@ mon=$(mktemp -u /tmp/graceos-mon.XXXXXX)
 accel=(-accel tcg); [[ -w /dev/kvm ]] && accel=(-accel kvm)
 
 qemu-system-x86_64 "${accel[@]}" -m 4096 -smp 4 -cdrom "$iso" -boot d \
-  -device virtio-vga -display none -monitor "unix:$mon,server,nowait" -daemonize
+  -vga std -display none -monitor "unix:$mon,server,nowait" -daemonize
 sleep "$wait"
 
 python3 - "$mon" "$png" <<'EOF'
