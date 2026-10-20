@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import concurrent.futures
 import datetime
+import http.client
 import ipaddress
 import socket
 import urllib.error
@@ -63,7 +64,9 @@ def _one_line(text) -> str:
 
 
 def _collapse(text: str) -> str:
-    return " ".join(text.split())
+    # Drop control characters too: titles end up on terminals.
+    return " ".join("".join(
+        c for c in text if c.isprintable() or c.isspace()).split())
 
 
 def _truncate_words(text: str, max_chars: int) -> str:
@@ -106,7 +109,7 @@ def _is_http_url(url: str) -> bool:
         scheme = urllib.parse.urlparse(url).scheme.lower()
     except ValueError:
         return False
-    return scheme in ("http", "https")
+    return scheme in ("http", "https") and url.isprintable()
 
 class _DDGParser(HTMLParser):
     def __init__(self) -> None:
@@ -271,26 +274,23 @@ def search(query, cfg, max_results: int = 5) -> list[Result]:
     return _search_duckduckgo(query, cfg, max_results)
 
 
+def _public_ip(text: str) -> bool:
+    try:
+        ip = ipaddress.ip_address(text.split("%")[0])
+    except ValueError:
+        return False
+    if ip.version == 6:  # IPv4 hidden in IPv6 counts as that IPv4
+        ip = ip.ipv4_mapped or ip.sixtofour or ip
+    return ip.is_global and not ip.is_multicast
+
+
 def _is_public_host(host: str) -> bool:
-    """True only when host resolves to public addresses only."""
+    """True only when host resolves to public internet addresses only."""
     try:
         infos = socket.getaddrinfo(host, None)
     except (socket.gaierror, OSError, UnicodeError):
         return False
-    if not infos:
-        return False
-    for info in infos:
-        addr = info[4] if len(info) > 4 else None
-        ip_text = addr[0] if addr else ""
-        try:
-            ip = ipaddress.ip_address(ip_text)
-        except ValueError:
-            return False
-        if ip.is_loopback or ip.is_private or ip.is_link_local:
-            return False
-        if ip.is_multicast or ip.is_reserved or ip.is_unspecified:
-            return False
-    return True
+    return bool(infos) and all(_public_ip(i[4][0]) for i in infos)
 
 
 class _PublicRedirects(urllib.request.HTTPRedirectHandler):
@@ -303,7 +303,41 @@ class _PublicRedirects(urllib.request.HTTPRedirectHandler):
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
-_opener = urllib.request.build_opener(_PublicRedirects)
+def _check_peer(conn) -> None:
+    """Check the address actually connected to, so a host name can't
+    switch to a local address after _is_public_host looked it up."""
+    if not _is_public_host(conn.sock.getpeername()[0]):
+        conn.sock.close()
+        raise OSError("refusing to read a non-public address")
+
+
+class _PublicHTTP(http.client.HTTPConnection):
+    def connect(self):
+        super().connect()
+        _check_peer(self)
+
+
+class _PublicHTTPS(http.client.HTTPSConnection):
+    def connect(self):
+        super().connect()
+        _check_peer(self)
+
+
+class _HTTPHandler(urllib.request.HTTPHandler):
+    def http_open(self, req):
+        return self.do_open(_PublicHTTP, req)
+
+
+class _HTTPSHandler(urllib.request.HTTPSHandler):
+    def https_open(self, req):
+        return self.do_open(_PublicHTTPS, req, context=self._context)
+
+
+# shortcut: no proxy for page reads (the peer check would see the proxy),
+# add proxy support with a CONNECT-aware check if someone needs it.
+_opener = urllib.request.build_opener(
+    urllib.request.ProxyHandler({}), _HTTPHandler, _HTTPSHandler,
+    _PublicRedirects)
 
 
 class _TextParser(HTMLParser):

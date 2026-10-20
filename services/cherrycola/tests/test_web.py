@@ -394,3 +394,33 @@ def test_chat_web_turn_keeps_history(ollama_cfg, capsys, monkeypatch):
         "system", "user", "assistant", "user"]
     assert "PAGE" in web_turn[0]["content"]
     assert [m["content"] for m in web_turn[1:]] == ["first", "ok", "second"]
+
+
+def test_fetch_text_checks_the_connected_address(page_server, monkeypatch):
+    # "localhost" passes the name check but connects to 127.0.0.1, like a
+    # DNS rebinding: the peer check must refuse it.
+    url = page_server.replace("127.0.0.1", "localhost") + "/p"
+    monkeypatch.setattr(web_mod, "_is_public_host", lambda h: True)
+    assert web_mod.fetch_text(url) != ""
+    monkeypatch.setattr(web_mod, "_is_public_host",
+                        lambda h: h != "127.0.0.1")
+    assert web_mod.fetch_text(url) == ""
+
+
+def test_public_ip():
+    assert web_mod._public_ip("93.184.215.14")
+    for bad in ("10.0.0.1", "100.64.0.1", "169.254.1.1", "::1",
+                "::ffff:127.0.0.1", "2002:7f00:1::1", "fe80::1%eth0",
+                "224.0.0.1", "nonsense"):
+        assert not web_mod._public_ip(bad), bad
+
+
+def test_results_lose_control_characters():
+    page = ('<div class="result"><a class="result__a" '
+            'href="https://example.com/a">Evil\x1b]0;pwned\x07 title</a>'
+            '<a class="result__snippet">snip\x1b[2J</a></div>'
+            '<div class="result"><a class="result__a" '
+            'href="https://example.com/\x1b[2J">bad url</a></div>')
+    results = web_mod._parse_ddg(page)
+    assert [(r.title, r.url, r.snippet) for r in results] == [
+        ("Evil]0;pwned title", "https://example.com/a", "snip[2J")]
