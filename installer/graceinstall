@@ -24,6 +24,16 @@ GRACEOS_REPO = {
 }
 
 
+# archinstall 4.5 appends custom repos to the live pacman.conf, copies that file to the target,
+# then appends them to the target again, so each repo shows up twice ("database already
+# registered" on every pacman run). Runs in the new system after the install: keep the first
+# copy of each [section].
+DEDUPE_PACMAN_CONF = (
+    "awk '/^\\[.*\\]$/ { skip = ($0 in seen); seen[$0] = 1 } !skip' /etc/pacman.conf"
+    " > /etc/pacman.conf.new && mv /etc/pacman.conf.new /etc/pacman.conf"
+)
+
+
 def package_sets(text: str) -> tuple[list[str], list[str]]:
     """(full, minimal) from the packages file: every section, or only those marked [minimal]."""
     full, minimal, in_minimal = [], [], False
@@ -45,6 +55,7 @@ def defaults(edition: str) -> dict:
         "packages": full if edition == "full" else minimal,
         "timezone": "UTC",
         "mirror_config": {"custom_repositories": [GRACEOS_REPO]},
+        "custom_commands": [DEDUPE_PACMAN_CONF],
     }
     if edition == "full":
         config["app_config"] = {"audio_config": {"audio": "pipewire"}, "bluetooth_config": {"enabled": True}}
@@ -76,7 +87,9 @@ def merged_config(args: list[str]) -> tuple[dict, list[str]]:
         # The GraceOS repo stays even when the user brings their own mirror settings.
         mirrors = user.pop("mirror_config", {})
         repos = [r for r in mirrors.get("custom_repositories", []) if r.get("name") != "graceos"]
+        commands = user.pop("custom_commands", [])
         config.update(user)
+        config["custom_commands"] = [DEDUPE_PACMAN_CONF, *commands]
         config["mirror_config"] = {**mirrors, "custom_repositories": [GRACEOS_REPO, *repos]}
     return config, args
 

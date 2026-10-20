@@ -1,6 +1,8 @@
 # python -m pytest installer/  (no root, no archinstall needed)
-import importlib.machinery, importlib.util, json
+import importlib.machinery, importlib.util, json, shutil, subprocess
 from pathlib import Path
+
+import pytest
 
 path = str(Path(__file__).with_name("graceinstall"))
 spec = importlib.util.spec_from_loader("graceinstall", importlib.machinery.SourceFileLoader("graceinstall", path))
@@ -52,3 +54,26 @@ def test_minimal_asks_and_has_no_desktop(tmp_path, monkeypatch):
     assert config["packages"] == ["git", "yay-bin"]
     assert "app_config" not in config
     assert config["mirror_config"]["custom_repositories"] == [gi.GRACEOS_REPO]
+    assert config["custom_commands"] == [gi.DEDUPE_PACMAN_CONF]
+
+
+def test_user_commands_run_after_the_pacman_conf_fix(tmp_path, monkeypatch):
+    (tmp_path / "packages").write_text(PACKAGES)
+    monkeypatch.setattr(gi, "SHARE", tmp_path)
+    user = tmp_path / "user.json"
+    user.write_text(json.dumps({"custom_commands": ["echo hi"]}))
+
+    config, _ = gi.merged_config(["--minimal", "--config", str(user)])
+
+    assert config["custom_commands"] == [gi.DEDUPE_PACMAN_CONF, "echo hi"]
+
+
+@pytest.mark.skipif(not shutil.which("sh") or not shutil.which("awk"), reason="needs sh and awk")
+def test_dedupe_keeps_the_first_copy_of_each_section(tmp_path):
+    conf = tmp_path / "etc" / "pacman.conf"
+    conf.parent.mkdir()
+    conf.write_text("[options]\nColor\n\n[core]\nInclude = m\n\n[graceos]\nServer = a\n\n"
+                    "[graceos]\nServer = a\n\n[mine]\nServer = b\n\n[mine]\nServer = b\n")
+    subprocess.run(["sh", "-c", gi.DEDUPE_PACMAN_CONF.replace("/etc/", f"{tmp_path.as_posix()}/etc/")], check=True)
+    assert conf.read_text() == ("[options]\nColor\n\n[core]\nInclude = m\n\n[graceos]\nServer = a\n\n"
+                                "[mine]\nServer = b\n\n")
