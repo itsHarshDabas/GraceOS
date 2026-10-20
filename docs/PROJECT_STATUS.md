@@ -79,7 +79,14 @@ _Last updated: 2026-10-19_
   - CherryCola: on-demand `ollama serve`, missing-model message (exit 3), `pull`, streamed `ask`, `status --json`; Ask Grace streams the answer. Tested with qwen3:0.6b to fit the VM (its answers are poor; real installs pick 1.7b/4b/8b by RAM).
   - Wine: `wine notepad` opens a window. yay 13.0.1 present. zram swap 1.9 GB active.
   - Idle RAM of the live desktop: about 1.1 GB used of 3.9 GB.
-  - Not yet checked: an install from this ISO (Full and Minimal), `pacman -Syu` from `[graceos]` on an installed system, Minimal's idle RAM, and the 3D-off lite mode on a fresh boot.
+  - Not yet checked: the 3D-off lite mode on a fresh boot.
+- **Installs from `graceos-2026.10.20` (CI build of `e44c918`, 2026-10-20), VMware UEFI, 3 GB, 30 GB virtual disk, unattended `graceinstall --silent`:**
+  - BIOS boot menu shows the GraceOS splash and wording.
+  - Full: "Installation completed without any errors", 608 packages, 6.1 GB on disk. Boots to the GraceOS console login; logging in starts Candyland (about 925 MB used at idle). Packages came from `[graceos]` (graceos-release 2026.10.20, candyland `c765203`, cherrycola `21ff1cd`); fastfetch, `cherrycola recommend` and the CherryCola chat app are installed; zram swap active.
+  - Bug found: archinstall 4.5 writes custom repos into the target's pacman.conf twice, so every pacman run printed "could not register 'graceos' database". graceinstall now removes the duplicate with a `custom_commands` step (`08cca78`). A second Minimal install with it ran the step and left one `[graceos]`; `pacman -Sy` is clean. ISOs before `08cca78` still produce the duplicate (fix: keep the first `[graceos]` block in `/etc/pacman.conf`).
+  - Minimal: 248 packages, 3.0 GB on disk, 329 MB used at idle on the console.
+  - Not checked: an actual package update arriving from `[graceos]` (the fresh installs were already current).
+- **CherryCola web search, chat app and recommendations (2026-10-20):** `cherrycola search`/`ask --web` against the real DuckDuckGo; the chat app downloads a model, answers, cites web sources, saves chats and stops mid-answer in the live VM; `recommend` picks qwen3:1.7b on the 3 GB VM. GPU engine detection (`ollama-cuda`/`ollama-vulkan`) is only unit-tested: the VM has no real GPU.
 - **Settings, every page (candyland `b320159`, 2026-10-20):** all 13 pages open without QML errors in the live VM. Checked by hand: Displays scale change applies live and is saved to `monitors.conf`; keyboard layouts and options, repeat, pointer speed, focus-follows-mouse, tiling style and snapping all reach Hyprland (`hyprctl getoption`); AI & Models starts Ollama and its Download opens CandySole running `cherrycola pull`; idle lock fired after 10 minutes. Not checked here: Wi-Fi, Bluetooth and Sound with real devices (the VM has a wired NIC and no Bluetooth or sound card).
 - **Builder VM vs host memory:** the VM takes 8 GB of the host's 15.4 GB and keeps being powered off under memory pressure. Run long builds with other heavy apps closed, or lower the VM to 6 GB.
 - **Real hardware:** not tried.
