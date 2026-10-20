@@ -1,11 +1,11 @@
 # Maintainer: GraceOS <https://github.com/itsHarshDabas/GraceOS>
-# Packages services/cherrycola from this checkout; pkgver counts the commits that touched it.
+# Builds the CherrySoda commit pinned in iso/cherrysoda.ref (build-packages.sh passes it in).
 pkgname=cherrycola
 pkgver=r0
 pkgrel=1
 pkgdesc="CherryCola: local model inference for GraceOS (Ollama by default, LM Studio supported)"
 arch=(any)
-url=https://github.com/itsHarshDabas/GraceOS
+url=https://github.com/itsHarshDabas/CherrySoda
 license=(LicenseRef-unspecified)
 depends=(python)
 optdepends=(
@@ -13,18 +13,22 @@ optdepends=(
   'python-gobject: the CherryCola chat app'
   'libadwaita: the CherryCola chat app'
 )
-_src=$startdir/../../services/cherrycola
+makedepends=(git)
+source=("git+$url.git#commit=${CHERRYSODA_COMMIT:?set CHERRYSODA_COMMIT}")
+sha256sums=(SKIP)
 
 pkgver() {
-  printf "r%s.%s" "$(git -C "$_src" rev-list --count HEAD -- .)" "$(git -C "$_src" log -1 --format=%h -- .)"
+  cd CherrySoda
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
 }
 
 package() {
+  cd CherrySoda
   install -d "$pkgdir/usr/lib/cherrycola"
-  cp -r "$_src/cherrycola" "$pkgdir/usr/lib/cherrycola/"
+  cp -r cherrycola "$pkgdir/usr/lib/cherrycola/"
   find "$pkgdir/usr/lib/cherrycola" -name __pycache__ -prune -exec rm -rf {} +
-  install -Dm755 "$_src/bin/cherrycola" "$pkgdir/usr/bin/cherrycola"
-  install -Dm755 "$_src/bin/cherrycola-chat" "$pkgdir/usr/bin/cherrycola-chat"
-  install -Dm644 "$_src/data/org.graceos.CherryCola.desktop" "$pkgdir/usr/share/applications/org.graceos.CherryCola.desktop"
-  install -Dm644 "$_src/data/org.graceos.CherryCola.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/org.graceos.CherryCola.svg"
+  install -Dm755 bin/cherrycola "$pkgdir/usr/bin/cherrycola"
+  install -Dm755 bin/cherrycola-chat "$pkgdir/usr/bin/cherrycola-chat"
+  install -Dm644 data/org.graceos.CherryCola.desktop "$pkgdir/usr/share/applications/org.graceos.CherryCola.desktop"
+  install -Dm644 data/org.graceos.CherryCola.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/org.graceos.CherryCola.svg"
 }

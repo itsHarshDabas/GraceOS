@@ -47,7 +47,7 @@ Then pick the disk, user and password, review, and install. It wipes the disk yo
 - `build/`: build, package-check, verify, boot, desktop and installer test scripts.
 - `installer/`: `graceinstall` and its tests (`python -m pytest installer/`).
 - `packages/`: PKGBUILDs for GraceOS's own packages; `build/build-packages.sh` builds them into the `graceos` repo.
-- `services/cherrycola/`: CherryCola, the local model CLI (`python -m pytest services/cherrycola`).
+- CherryCola, the local model CLI and chat app, lives in its own repo, [CherrySoda](https://github.com/itsHarshDabas/CherrySoda). GraceOS builds the commit pinned in `iso/cherrysoda.ref`.
 - `docs/`: status, tasks, roadmap, architecture, decisions and vision.
 
 Line endings are LF everywhere (enforced by `.gitattributes`).

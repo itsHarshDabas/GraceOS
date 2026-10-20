@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['packages/**', 'services/cherrycola/**', 'iso/candyland.ref', 'build/build-packages.sh', '.github/workflows/packages.yml']
+    paths: ['packages/**', 'iso/candyland.ref', 'iso/cherrysoda.ref', 'build/build-packages.sh', '.github/workflows/packages.yml']
 permissions:
   contents: write
 concurrency: packages

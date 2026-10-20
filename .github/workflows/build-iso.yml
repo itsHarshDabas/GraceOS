@@ -3,9 +3,9 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['iso/**', 'build/**', 'packages/**', 'services/cherrycola/**', '.github/workflows/build-iso.yml']
+    paths: ['iso/**', 'build/**', 'packages/**', '.github/workflows/build-iso.yml']
   pull_request:
-    paths: ['iso/**', 'build/**', 'packages/**', 'services/cherrycola/**', '.github/workflows/build-iso.yml']
+    paths: ['iso/**', 'build/**', 'packages/**', '.github/workflows/build-iso.yml']
 jobs:
   iso:
     runs-on: ubuntu-latest
