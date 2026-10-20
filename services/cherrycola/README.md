@@ -58,6 +58,7 @@ cherrycola search "latest Arch news" [--json]  # web results, no model
 cherrycola chat                         # interactive (/exit, /clear, /web, Ctrl+D)
 cherrycola status [--json]
 cherrycola models
+cherrycola recommend [--json]           # models that fit this PC, and the Ollama build for its GPU
 cherrycola pull [MODEL]                 # Ollama only; downloads from the internet
 cherrycola use qwen3:4b
 cherrycola backend lmstudio

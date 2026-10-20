@@ -14,6 +14,7 @@ from typing import Sequence
 
 from . import backends as be
 from . import config as config_mod
+from . import hardware
 from . import web as web_mod
 
 __all__ = ["build_parser", "main", "run"]
@@ -388,6 +389,27 @@ def cmd_models(args, cfg: config_mod.Config) -> int:
     return EXIT_OK
 
 
+def cmd_recommend(args, cfg: config_mod.Config) -> int:
+    _ = cfg
+    r = hardware.recommend(config_mod.total_ram_bytes(),
+                           hardware.detect_gpus())
+    if args.json:
+        print(json.dumps(r))
+        return EXIT_OK
+    where = (f"graphics card ({r['vram_gb']} GB)" if r["runs_on"] == "gpu"
+             else f"processor ({r['ram_gb']} GB RAM)")
+    print(f"Models run on the {where}.")
+    state = ("installed" if r["engine_installed"]
+             else f"install it: sudo pacman -S {r['engine']}")
+    print(f"Engine: {r['engine']} - {r['engine_reason']} ({state})")
+    print(f"Recommended: {r['recommended']}\n")
+    for m in r["models"]:
+        if m["fits"]:
+            flag = "  (slow here)" if m["slow"] else ""
+            print(f"  {m['model']:<20} {m['size_gb']:>5} GB  {m['note']}{flag}")
+    return EXIT_OK
+
+
 def cmd_pull(args, cfg: config_mod.Config) -> int:
     backend = be.resolve_backend(cfg)
     model = args.model or be.resolve_model(backend, cfg)
@@ -450,6 +472,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("models", help="list installed models")
 
+    rec = sub.add_parser("recommend",
+                         help="models and engine that suit this PC")
+    rec.add_argument("--json", action="store_true",
+                     help="machine-readable JSON")
+
     rm = sub.add_parser("remove", help="delete a downloaded model (Ollama only)")
     rm.add_argument("model")
 
@@ -482,6 +509,8 @@ def run(argv: Sequence[str] | None = None,
             return cmd_status(args, loaded)
         if args.command == "models":
             return cmd_models(args, loaded)
+        if args.command == "recommend":
+            return cmd_recommend(args, loaded)
         if args.command == "pull":
             return cmd_pull(args, loaded)
         if args.command == "remove":
