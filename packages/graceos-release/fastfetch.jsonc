@@ -1,0 +1,39 @@
+// GraceOS default fastfetch (installed as /etc/xdg/fastfetch/config.jsonc).
+// Your own ~/.config/fastfetch/config.jsonc replaces it.
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "file",
+    "source": "/usr/share/graceos/fastfetch-logo.txt",
+    "color": { "1": "38;2;240;150;80", "2": "38;2;250;200;140" },
+    "padding": { "top": 1, "right": 2 }
+  },
+  "display": {
+    "separator": "  ",
+    "color": { "keys": "38;2;240;150;80", "title": "38;2;250;200;140" }
+  },
+  "modules": [
+    "title",
+    "separator",
+    { "type": "os", "key": "OS" },
+    { "type": "kernel", "key": "Kernel" },
+    { "type": "uptime", "key": "Uptime" },
+    { "type": "packages", "key": "Packages" },
+    { "type": "shell", "key": "Shell" },
+    { "type": "wm", "key": "Desktop", "format": "Grace Candyland on {pretty-name}" },
+    { "type": "terminal", "key": "Terminal" },
+    "break",
+    { "type": "cpu", "key": "CPU", "format": "{name} ({cores-logical} threads)" },
+    { "type": "gpu", "key": "GPU" },
+    { "type": "memory", "key": "Memory" },
+    { "type": "swap", "key": "Swap" },
+    { "type": "disk", "key": "Disk", "folders": "/" },
+    {
+      "type": "command",
+      "key": "Local AI",
+      "text": "command -v cherrycola >/dev/null && cherrycola status --json 2>/dev/null | python3 -c 'import json,sys; s=json.load(sys.stdin); print(s[\"model\"] + (\" (loaded)\" if s.get(\"running\") else \" (not running)\" if not s.get(\"reachable\") else \"\"))'"
+    },
+    "break",
+    "colors"
+  ]
+}

@@ -1,18 +1,21 @@
 # Maintainer: GraceOS <https://github.com/itsHarshDabas/GraceOS>
 pkgname=graceos-release
-pkgver=2026.10.19
+pkgver=2026.10.20
 pkgrel=1
-pkgdesc="GraceOS identity (os-release kept through filesystem updates), desktop autostart and zram defaults"
+pkgdesc="GraceOS identity (os-release kept through filesystem updates), fastfetch look, desktop autostart and zram defaults"
 arch=(any)
 url=https://github.com/itsHarshDabas/GraceOS
 license=(LicenseRef-unspecified)
 depends=(filesystem)
-source=(os-release graceos-release.hook grace-candyland.sh zram-generator.conf)
-sha256sums=(SKIP SKIP SKIP SKIP)
+source=(os-release graceos-release.hook grace-candyland.sh zram-generator.conf
+        fastfetch.jsonc fastfetch-logo.txt)
+sha256sums=(SKIP SKIP SKIP SKIP SKIP SKIP)
 
 package() {
   install -Dm644 os-release "$pkgdir/usr/lib/graceos/os-release"
   install -Dm644 graceos-release.hook "$pkgdir/usr/share/libalpm/hooks/graceos-release.hook"
   install -Dm644 grace-candyland.sh "$pkgdir/etc/profile.d/grace-candyland.sh"
   install -Dm644 zram-generator.conf "$pkgdir/usr/lib/systemd/zram-generator.conf"
+  install -Dm644 fastfetch.jsonc "$pkgdir/etc/xdg/fastfetch/config.jsonc"
+  install -Dm644 fastfetch-logo.txt "$pkgdir/usr/share/graceos/fastfetch-logo.txt"
 }
