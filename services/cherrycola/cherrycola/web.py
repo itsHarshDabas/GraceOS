@@ -274,13 +274,20 @@ def search(query, cfg, max_results: int = 5) -> list[Result]:
     return _search_duckduckgo(query, cfg, max_results)
 
 
+_NAT64 = ipaddress.ip_network("64:ff9b::/96")
+_V4_COMPAT = ipaddress.ip_network("::/96")
+
+
 def _public_ip(text: str) -> bool:
     try:
         ip = ipaddress.ip_address(text.split("%")[0])
     except ValueError:
         return False
     if ip.version == 6:  # IPv4 hidden in IPv6 counts as that IPv4
-        ip = ip.ipv4_mapped or ip.sixtofour or ip
+        if ip in _NAT64 or ip in _V4_COMPAT:
+            ip = ipaddress.IPv4Address(int(ip) & 0xFFFFFFFF)
+        else:
+            ip = ip.ipv4_mapped or ip.sixtofour or ip
     return ip.is_global and not ip.is_multicast
 
 

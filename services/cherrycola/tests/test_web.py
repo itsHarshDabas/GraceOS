@@ -411,7 +411,8 @@ def test_public_ip():
     assert web_mod._public_ip("93.184.215.14")
     for bad in ("10.0.0.1", "100.64.0.1", "169.254.1.1", "::1",
                 "::ffff:127.0.0.1", "2002:7f00:1::1", "fe80::1%eth0",
-                "224.0.0.1", "nonsense"):
+                "224.0.0.1", "nonsense", "64:ff9b::7f00:1",
+                "64:ff9b::a9fe:a9fe", "64:ff9b:1::a00:1", "::7f00:1"):
         assert not web_mod._public_ip(bad), bad
 
 
