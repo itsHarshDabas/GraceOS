@@ -138,6 +138,7 @@ graceos-release
 jq
 nodejs
 npm
+pacman-contrib
 pciutils
 python
 python-pip

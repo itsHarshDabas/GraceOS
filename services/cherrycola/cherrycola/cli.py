@@ -278,6 +278,7 @@ def cmd_status(args, cfg: config_mod.Config) -> int:
     if args.json:
         print(json.dumps({
             "backend": backend,
+            "configured_backend": cfg.backend,
             "reachable": reachable,
             "model": model,
             "installed": installed,
@@ -364,6 +365,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("models", help="list installed models")
 
+    rm = sub.add_parser("remove", help="delete a downloaded model (Ollama only)")
+    rm.add_argument("model")
+
     pull = sub.add_parser("pull", help="download a model (Ollama only)")
     pull.add_argument("model", nargs="?", default=None)
 
@@ -393,6 +397,14 @@ def run(argv: Sequence[str] | None = None,
             return cmd_models(args, loaded)
         if args.command == "pull":
             return cmd_pull(args, loaded)
+        if args.command == "remove":
+            backend = be.resolve_backend(loaded)
+            rc = ensure_running(backend, loaded)
+            if rc != EXIT_OK:
+                return rc
+            be.remove_model(backend, loaded, args.model)
+            print(f"Removed {args.model}.")
+            return EXIT_OK
         if args.command == "use":
             config_mod.save_setting("model", args.model, loaded.path)
             print(f"Using model {args.model}.")

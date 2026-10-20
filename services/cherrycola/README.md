@@ -62,7 +62,7 @@ cherrycola stop                         # stops only the server cherrycola start
 ## `status --json` shape (stable)
 
 ```json
-{"backend": "ollama", "reachable": true, "model": "qwen3:4b",
+{"backend": "ollama", "configured_backend": "auto", "reachable": true, "model": "qwen3:4b",
  "installed": true, "running": "qwen3:4b", "models": ["qwen3:4b"]}
 ```
 

@@ -16,7 +16,7 @@ Each brief is meant to be pasted directly to a coding agent (Claude Code, OpenCo
 | T-009 | Choose a LICENSE | repo root | Harsh (owner decision) | blocked | — |
 | T-010 | Security review of `build/` and `iso/` | review only | unassigned | todo | T-001 |
 | T-011 | Window title bars with traffic lights for every app | `grace-candyland` | unassigned | todo | T-003 |
-| T-012 | Settings pages beyond Appearance (Wi-Fi, Displays, Sound, Power, AI & Models, Agents, About) | `grace-candyland` | unassigned | todo | T-003 |
+| T-012 | Settings pages beyond Appearance (Wi-Fi, Displays, Sound, Power, AI & Models, Agents, About) | `grace-candyland` | Harsh (Claude) | done (all 13 pages; Wi-Fi, Bluetooth and Sound untested on real hardware) | T-003 |
 | T-013 | Lock screen "Goodness GraceOS" and idle locking (polkit agent later) | `grace-candyland` | Harsh (Claude) | review (lock screen and idle locking done; polkit agent todo) | T-003 |
 | T-014 | Make `grace-candyland` public so CI can clone it | GitHub settings | Harsh | done | — |
 | T-015 | `graceinstall`: guided disk installer (archinstall + GraceOS defaults) | `installer/`, ADR 0005 | Harsh | v0 done; unattended QEMU install test in `build/install-test.py` | — |

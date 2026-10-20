@@ -31,6 +31,7 @@ def test_status_json_ollama(ollama_cfg, capsys):
     payload = json.loads(capsys.readouterr().out)
     assert payload == {
         "backend": "ollama",
+        "configured_backend": "ollama",
         "reachable": True,
         "model": "qwen3:4b",
         "installed": True,
@@ -194,3 +195,15 @@ def test_start_uses_injected_spawn(tmp_path, monkeypatch):
     assert (tmp_path / "ollama.pid").read_text().strip() == "424242"
 
 
+
+
+def test_remove_model(ollama_cfg, capsys):
+    assert run(["remove", "qwen3:8b"], cfg=ollama_cfg) == 0
+    assert "Removed qwen3:8b" in capsys.readouterr().out
+    assert run(["remove", "nope:1b"], cfg=ollama_cfg) == 2
+    assert "no model named nope:1b" in capsys.readouterr().err
+
+
+def test_status_reports_configured_backend(ollama_cfg, capsys):
+    run(["status", "--json"], cfg=ollama_cfg)
+    assert json.loads(capsys.readouterr().out)["configured_backend"] == "ollama"

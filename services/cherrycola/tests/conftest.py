@@ -101,6 +101,18 @@ def _make_handler(kind: str):
             self.send_response(404)
             self.end_headers()
 
+        def do_DELETE(self):
+            length = int(self.headers.get("Content-Length", 0))
+            payload = json.loads(self.rfile.read(length).decode() or "{}")
+            if kind == "ollama" and self.path == "/api/delete":
+                code = 200 if payload.get("model") == "qwen3:8b" else 404
+                self.send_response(code)
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return
+            self.send_response(404)
+            self.end_headers()
+
     return Handler
 
 

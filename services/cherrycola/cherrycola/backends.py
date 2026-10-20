@@ -308,6 +308,26 @@ def iter_chat_chunks(backend, cfg, model, messages):
             yield from _iter_lmstudio_text(resp)
 
 
+def remove_model(backend, cfg, model) -> None:
+    """Ollama only: DELETE /api/delete."""
+    if backend != "ollama":
+        raise BackendError("models are removed in the LM Studio app")
+    req = urllib.request.Request(
+        _url(cfg.ollama_url, "/api/delete"),
+        data=json.dumps({"model": model}).encode(),
+        headers={"Content-Type": "application/json"}, method="DELETE",
+    )
+    try:
+        urllib.request.urlopen(req, timeout=_TIMEOUT).close()
+    except urllib.error.HTTPError as exc:
+        if exc.code == 404:
+            raise BackendError(f"no model named {model}") from exc
+        raise BackendError(str(exc)) from exc
+    except (urllib.error.URLError, socket.timeout, OSError,
+            http.client.HTTPException) as exc:
+        raise BackendError(str(exc) or type(exc).__name__) from exc
+
+
 def pull_model(backend, cfg, model, on_progress=None) -> None:
     """Ollama only: POST /api/pull, streaming progress objects."""
     if backend != "ollama":

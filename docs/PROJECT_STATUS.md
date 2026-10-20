@@ -80,6 +80,7 @@ _Last updated: 2026-10-19_
   - Wine: `wine notepad` opens a window. yay 13.0.1 present. zram swap 1.9 GB active.
   - Idle RAM of the live desktop: about 1.1 GB used of 3.9 GB.
   - Not yet checked: an install from this ISO (Full and Minimal), `pacman -Syu` from `[graceos]` on an installed system, Minimal's idle RAM, and the 3D-off lite mode on a fresh boot.
+- **Settings, every page (candyland `b320159`, 2026-10-20):** all 13 pages open without QML errors in the live VM. Checked by hand: Displays scale change applies live and is saved to `monitors.conf`; keyboard layouts and options, repeat, pointer speed, focus-follows-mouse, tiling style and snapping all reach Hyprland (`hyprctl getoption`); AI & Models starts Ollama and its Download opens CandySole running `cherrycola pull`; idle lock fired after 10 minutes. Not checked here: Wi-Fi, Bluetooth and Sound with real devices (the VM has a wired NIC and no Bluetooth or sound card).
 - **Builder VM vs host memory:** the VM takes 8 GB of the host's 15.4 GB and keeps being powered off under memory pressure. Run long builds with other heavy apps closed, or lower the VM to 6 GB.
 - **Real hardware:** not tried.
 - **CI can't clone the private candyland repo** (T-014).
