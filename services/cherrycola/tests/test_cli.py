@@ -37,6 +37,7 @@ def test_status_json_ollama(ollama_cfg, capsys):
         "installed": True,
         "running": "qwen3:4b",
         "models": ["qwen3:4b", "qwen3:8b"],
+        "search": "duckduckgo",
     }
 
 

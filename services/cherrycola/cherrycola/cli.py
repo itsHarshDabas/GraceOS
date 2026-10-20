@@ -14,6 +14,7 @@ from typing import Sequence
 
 from . import backends as be
 from . import config as config_mod
+from . import web as web_mod
 
 __all__ = ["build_parser", "main", "run"]
 
@@ -200,6 +201,9 @@ def cmd_ask(args, cfg: config_mod.Config) -> int:
     if not question:
         _err("ask needs a question")
         return EXIT_USAGE
+    use_web = bool(getattr(args, "web", False))
+    if use_web:
+        return _answer_with_sources(question, args, cfg, backend, model)
     messages = [
         {"role": "system", "content": be.SYSTEM_PROMPT},
         {"role": "user", "content": question},
@@ -214,6 +218,70 @@ def cmd_ask(args, cfg: config_mod.Config) -> int:
     return EXIT_OK
 
 
+def _answer_with_sources(question: str, args, cfg: config_mod.Config,
+                         backend: str, model: str,
+                         history: list[dict[str, str]] | None = None) -> int:
+    """Search, read the top pages, stream a cited answer, print Sources.
+
+    history (chat) keeps only the plain question and answer; the page text
+    goes in this turn's system prompt only.
+    """
+    if history is None:
+        history = [{"role": "system", "content": be.SYSTEM_PROMPT}]
+    try:
+        results = web_mod.search(question, cfg)
+        if not results:
+            _err("web search returned nothing")
+    except be.BackendError as exc:
+        _err(str(exc) or "web search failed")
+        results = []
+    turn = {"role": "user", "content": question}
+    if results:
+        pages = web_mod.fetch_many([r.url for r in results[:cfg.web_pages]])
+        grounded = web_mod.web_messages(question, results, pages)
+        messages = grounded[:1] + history[1:] + [turn]
+    else:
+        _err("answering without the web")
+        messages = history + [turn]
+    try:
+        answer = _stream_answer(backend, cfg, model, messages,
+                                args.show_thinking)
+    except be.BackendError as exc:
+        _err(str(exc) or "backend request failed")
+        return EXIT_UNREACHABLE
+    except BrokenPipeError:
+        return EXIT_OK
+    history += [turn, {"role": "assistant", "content": answer}]
+    if results:
+        sys.stdout.write("\nSources:\n")
+        for i, item in enumerate(results, start=1):
+            sys.stdout.write(f"[{i}] {item.url}\n")
+        sys.stdout.flush()
+    return EXIT_OK
+
+
+def cmd_search(args, cfg: config_mod.Config) -> int:
+    query = " ".join(args.query).strip()
+    if not query:
+        _err("search needs a query")
+        return EXIT_USAGE
+    try:
+        results = web_mod.search(query, cfg)
+    except be.BackendError as exc:
+        _err(str(exc) or "web search failed")
+        return EXIT_UNREACHABLE
+    if args.json:
+        print(json.dumps([
+            {"title": r.title, "url": r.url, "snippet": r.snippet}
+            for r in results]))
+        return EXIT_OK
+    for i, item in enumerate(results, start=1):
+        print(f"{i}. {item.title}")
+        print(f"   {item.url}")
+        print(f"   {item.snippet}")
+    return EXIT_OK
+
+
 def cmd_chat(args, cfg: config_mod.Config) -> int:
     backend = be.resolve_backend(cfg)
     rc = ensure_running(backend, cfg)
@@ -225,6 +293,7 @@ def cmd_chat(args, cfg: config_mod.Config) -> int:
         return EXIT_MODEL_MISSING
     history: list[dict[str, str]] = [
         {"role": "system", "content": be.SYSTEM_PROMPT}]
+    web_mode = False
     print(f"CherryCola ({backend}/{model}). /exit quits, /clear resets.")
     while True:
         try:
@@ -243,6 +312,14 @@ def cmd_chat(args, cfg: config_mod.Config) -> int:
         if text == "/clear":
             history = history[:1]
             print("(history cleared)")
+            continue
+        if text == "/web":
+            web_mode = not web_mode
+            print("Web search on." if web_mode else "Web search off.")
+            continue
+        if web_mode:
+            _answer_with_sources(text, args, cfg, backend, model,
+                                 history=history)
             continue
         history.append({"role": "user", "content": text})
         try:
@@ -284,6 +361,7 @@ def cmd_status(args, cfg: config_mod.Config) -> int:
             "installed": installed,
             "running": running,
             "models": models,
+            "search": cfg.search,
         }))
         return EXIT_OK
     print(f"backend:   {backend}")
@@ -354,6 +432,13 @@ def build_parser() -> argparse.ArgumentParser:
     ask.add_argument("question", nargs="+", help="question words, or - for stdin")
     ask.add_argument("--show-thinking", action="store_true",
                      help="keep <think> reasoning blocks")
+    ask.add_argument("--web", action="store_true",
+                     help="search the web first and cite sources")
+
+    search_cmd = sub.add_parser("search", help="search the web (no model)")
+    search_cmd.add_argument("query", nargs="+", help="search words")
+    search_cmd.add_argument("--json", action="store_true",
+                            help="machine-readable JSON")
 
     chat = sub.add_parser("chat", help="interactive chat loop")
     chat.add_argument("--show-thinking", action="store_true",
@@ -389,6 +474,8 @@ def run(argv: Sequence[str] | None = None,
     try:
         if args.command == "ask":
             return cmd_ask(args, loaded)
+        if args.command == "search":
+            return cmd_search(args, loaded)
         if args.command == "chat":
             return cmd_chat(args, loaded)
         if args.command == "status":

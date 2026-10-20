@@ -39,6 +39,10 @@ uv run python -m cherrycola status
 | `model` | RAM-based | under 6 GB RAM → `qwen3:1.7b`, under 12 GB → `qwen3:4b`, else `qwen3:8b`; LM Studio defaults to its first listed model |
 | `ollama_url` | `http://127.0.0.1:11434` | |
 | `lmstudio_url` | `http://127.0.0.1:1234` | |
+| `search` | `duckduckgo` | `duckduckgo` (default), `searxng`, or `off` |
+| `searxng_url` | `http://127.0.0.1:8888` | base URL of a local SearXNG instance |
+| `duckduckgo_url` | `https://html.duckduckgo.com/html/` | override for tests |
+| `web_pages` | `3` | pages to read for `ask --web` (clamped 0..5) |
 
 `cherrycola use MODEL` and `cherrycola backend NAME` rewrite only that one
 line (comments and other lines kept; appended if absent).
@@ -49,7 +53,9 @@ line (comments and other lines kept; appended if absent).
 cherrycola ask "what is ext4?"          # one question, streamed
 echo "summarize this" | cherrycola ask -   # question from stdin
 cherrycola ask --show-thinking "why?"   # keep <think> blocks (stripped by default)
-cherrycola chat                         # interactive (/exit, /clear, Ctrl+D)
+cherrycola ask --web "latest Arch news?"  # search the web, cite sources
+cherrycola search "latest Arch news" [--json]  # web results, no model
+cherrycola chat                         # interactive (/exit, /clear, /web, Ctrl+D)
 cherrycola status [--json]
 cherrycola models
 cherrycola pull [MODEL]                 # Ollama only; downloads from the internet
@@ -63,7 +69,7 @@ cherrycola stop                         # stops only the server cherrycola start
 
 ```json
 {"backend": "ollama", "configured_backend": "auto", "reachable": true, "model": "qwen3:4b",
- "installed": true, "running": "qwen3:4b", "models": ["qwen3:4b"]}
+ "installed": true, "running": "qwen3:4b", "models": ["qwen3:4b"], "search": "duckduckgo"}
 ```
 
 `running` is `null` when no model is loaded. Exit 0 even when the server is
@@ -71,6 +77,24 @@ down (that is a status, not an error). Exit codes everywhere: 0 ok,
 1 usage/other error, 2 backend unreachable, 3 model missing
 (`ask`/`chat` when the model isn't downloaded — nothing is downloaded
 without `pull`).
+
+## How web search works
+
+`cherrycola search` queries DuckDuckGo's HTML results (no key) or a
+local SearXNG instance (`search = searxng`), then `ask --web` reads the
+top `web_pages` pages locally and asks the model to answer from them,
+with `[n]` citations and a `Sources:` list. Results and page text are
+untrusted: the model only writes text, it never runs anything.
+In `chat`, `/web` toggles web mode; history keeps only the question
+and the answer, never the page text.
+
+## Chat app
+
+`cherrycola-chat` (CherryCola in the app grid) is a GTK4 / libadwaita window
+on the same engine: pick the model in the header, turn on web search with the
+globe, and old chats stay in the sidebar. A missing model shows a Download
+banner. Chats are JSON files in `~/.local/share/cherrycola/chats/`; delete one
+with the trash button. Needs `python-gobject` and `libadwaita`.
 
 ## Run the tests
 

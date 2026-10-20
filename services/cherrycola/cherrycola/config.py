@@ -8,9 +8,12 @@ from pathlib import Path
 
 __all__ = [
     "BACKENDS",
+    "DEFAULT_DUCKDUCKGO_URL",
     "DEFAULT_LMSTUDIO_URL",
     "DEFAULT_OLLAMA_URL",
+    "DEFAULT_SEARXNG_URL",
     "MODEL_SIZES_GB",
+    "SEARCH_BACKENDS",
     "Config",
     "config_path",
     "default_model_for_ram",
@@ -22,6 +25,9 @@ __all__ = [
 BACKENDS = ("auto", "ollama", "lmstudio")
 DEFAULT_OLLAMA_URL = "http://127.0.0.1:11434"
 DEFAULT_LMSTUDIO_URL = "http://127.0.0.1:1234"
+SEARCH_BACKENDS = ("duckduckgo", "searxng", "off")
+DEFAULT_SEARXNG_URL = "http://127.0.0.1:8888"
+DEFAULT_DUCKDUCKGO_URL = "https://html.duckduckgo.com/html/"
 
 #: Approximate download sizes for the default models (GB).
 MODEL_SIZES_GB = {
@@ -30,7 +36,8 @@ MODEL_SIZES_GB = {
     "qwen3:8b": 5.2,
 }
 
-_VALID_KEYS = ("backend", "model", "ollama_url", "lmstudio_url")
+_VALID_KEYS = ("backend", "model", "ollama_url", "lmstudio_url",
+               "search", "searxng_url", "duckduckgo_url", "web_pages")
 
 
 @dataclass
@@ -39,6 +46,10 @@ class Config:
     model: str | None = None
     ollama_url: str = DEFAULT_OLLAMA_URL
     lmstudio_url: str = DEFAULT_LMSTUDIO_URL
+    search: str = "duckduckgo"
+    searxng_url: str = DEFAULT_SEARXNG_URL
+    duckduckgo_url: str = DEFAULT_DUCKDUCKGO_URL
+    web_pages: int = 3
     path: Path | None = None
 
 
@@ -77,6 +88,19 @@ def load_config(path: Path | None = None) -> Config:
             cfg.ollama_url = value.rstrip("/")
         elif key == "lmstudio_url":
             cfg.lmstudio_url = value.rstrip("/")
+        elif key == "search":
+            lowered = value.lower()
+            if lowered in SEARCH_BACKENDS:
+                cfg.search = lowered
+        elif key == "searxng_url":
+            cfg.searxng_url = value.rstrip("/")
+        elif key == "duckduckgo_url":
+            cfg.duckduckgo_url = value.rstrip("/")
+        elif key == "web_pages":
+            try:
+                cfg.web_pages = max(0, min(5, int(value)))
+            except ValueError:
+                pass
     return cfg
 
 

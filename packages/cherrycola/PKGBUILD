@@ -10,6 +10,8 @@ license=(LicenseRef-unspecified)
 depends=(python)
 optdepends=(
   'ollama: run models on the CPU (or ollama-cuda, ollama-rocm, ollama-vulkan for a GPU)'
+  'python-gobject: the CherryCola chat app'
+  'libadwaita: the CherryCola chat app'
 )
 _src=$startdir/../../services/cherrycola
 
@@ -22,4 +24,7 @@ package() {
   cp -r "$_src/cherrycola" "$pkgdir/usr/lib/cherrycola/"
   find "$pkgdir/usr/lib/cherrycola" -name __pycache__ -prune -exec rm -rf {} +
   install -Dm755 "$_src/bin/cherrycola" "$pkgdir/usr/bin/cherrycola"
+  install -Dm755 "$_src/bin/cherrycola-chat" "$pkgdir/usr/bin/cherrycola-chat"
+  install -Dm644 "$_src/data/org.graceos.CherryCola.desktop" "$pkgdir/usr/share/applications/org.graceos.CherryCola.desktop"
+  install -Dm644 "$_src/data/org.graceos.CherryCola.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/org.graceos.CherryCola.svg"
 }
