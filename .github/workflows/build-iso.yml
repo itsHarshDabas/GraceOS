@@ -6,15 +6,18 @@ on:
     paths: ['iso/**', 'build/**', 'packages/**', '.github/workflows/build-iso.yml']
   pull_request:
     paths: ['iso/**', 'build/**', 'packages/**', '.github/workflows/build-iso.yml']
+# Main and manual runs publish the ISO as a release; one at a time, so an older build never replaces a newer one.
+concurrency: { group: 'build-iso-${{ github.ref }}', cancel-in-progress: false }
 jobs:
   iso:
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    permissions: { contents: write }  # only the publish step uses it
     container:
       image: archlinux:latest
       options: --privileged
     steps:
-      - run: pacman -Syu --noconfirm archiso git qemu-base edk2-ovmf base-devel make python
+      - run: pacman -Syu --noconfirm archiso git qemu-base edk2-ovmf base-devel make python github-cli
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }  # package versions count commits
       # Build GraceOS's own packages here too, so the ISO never waits on the published repo.
@@ -25,9 +28,13 @@ jobs:
       # boot-test.sh uses KVM when the runner exposes /dev/kvm and falls back to (slow) TCG otherwise.
       - run: build/boot-test.sh out/graceos-*.iso bios 900
       - run: build/boot-test.sh out/graceos-*.iso uefi 900
+      # The tested ISO becomes the "Latest" release (in parts when it's over GitHub's 2 GiB file limit).
+      - if: github.event_name != 'pull_request'
+        env: { GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}', SHA: '${{ github.sha }}' }
+        run: build/publish-iso.sh
       - uses: actions/upload-artifact@v4
         with: { name: graceos-iso-sha256, path: out/*.sha256 }
-      # The 1.7 GB ISO is only kept for manual runs, to save artifact storage.
+      # Manual runs also keep the ISO as a workflow artifact for a week.
       - if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with: { name: graceos-iso, path: out/*.iso, retention-days: 7 }

@@ -4,6 +4,11 @@ An Arch Linux-based, AI-native operating system for AI/ML developers.
 
 **Status: early.** The live ISO is set up to start the GraceOS desktop, [Grace Candyland](https://github.com/itsHarshDabas/grace-candyland) (Hyprland with a Quickshell shell, see [ADR 0004](docs/decisions/0004-grace-candyland-desktop.md)). Nothing here is a finished feature. See [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) for what has actually been built and tested.
 
+## Download
+The [Latest release](https://github.com/itsHarshDabas/GraceOS/releases/latest) has the newest ISO that passed the build's checks and its BIOS and UEFI boot tests. Every push to `main` that changes the ISO replaces it.
+- GitHub limits release files to 2 GiB, so a bigger ISO comes in parts (`.part00`, `.part01`, …).
+- Download every part and the `.sha256` into one folder, then run `cat graceos-*.iso.part* > graceos-<date>-x86_64.iso` and `sha256sum -c graceos-*.iso.sha256`.
+
 ## Start here
 - [AGENTS.md](AGENTS.md): rules for humans and coding agents (Claude Code, OpenCode, Cline).
 - [CONTRIBUTING.md](CONTRIBUTING.md): branch and PR workflow, and how to split work across agents.
@@ -22,7 +27,7 @@ sudo build/verify-iso.sh out/graceos-*.iso          # checksum, branding, symlin
 build/boot-test.sh out/graceos-*.iso bios           # boots in QEMU and waits for sshd (needs qemu-base)
 build/boot-test.sh out/graceos-*.iso uefi           # also needs edk2-ovmf
 ```
-The `build-iso` GitHub Actions workflow runs the same steps in an Arch container on every push to `main` and every PR that touches `iso/`, `build/` or the workflow. It can also be triggered manually, and only manual runs keep the ISO as an artifact.
+The `build-iso` GitHub Actions workflow runs the same steps in an Arch container on every push to `main` and every PR that touches `iso/`, `build/`, `packages/` or the workflow. Runs on `main`, and manual runs, then publish the tested ISO as the Latest release (`build/publish-iso.sh`); manual runs also keep it as a workflow artifact for a week.
 
 ## Try it in a VM
 Create a VM (VMware, VirtualBox, virt-manager or QEMU) with **UEFI** firmware, 4 GB of RAM, 2 or more CPUs and a 30 GB disk, and boot the ISO. The live session logs in as `grace` (no password, `sudo` works) and the desktop starts by itself in about a minute. It runs without 3D acceleration too, using software rendering. Press Super+Space to search apps, or open **Install GraceOS** there to install onto the VM's disk.
