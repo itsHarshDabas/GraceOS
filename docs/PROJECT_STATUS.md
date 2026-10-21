@@ -88,6 +88,11 @@ _Last updated: 2026-10-19_
   - Not checked: an actual package update arriving from `[graceos]` (the fresh installs were already current).
 - **CherryCola web search, chat app and recommendations (2026-10-20):** `cherrycola search`/`ask --web` against the real DuckDuckGo; the chat app downloads a model, answers, cites web sources, saves chats and stops mid-answer in the live VM; `recommend` picks qwen3:1.7b on the 3 GB VM. GPU engine detection (`ollama-cuda`/`ollama-vulkan`) is only unit-tested: the VM has no real GPU.
 - **Settings, every page (candyland `b320159`, 2026-10-20):** all 13 pages open without QML errors in the live VM. Checked by hand: Displays scale change applies live and is saved to `monitors.conf`; keyboard layouts and options, repeat, pointer speed, focus-follows-mouse, tiling style and snapping all reach Hyprland (`hyprctl getoption`); AI & Models starts Ollama and its Download opens CandySole running `cherrycola pull`; idle lock fired after 10 minutes. Not checked here: Wi-Fi, Bluetooth and Sound with real devices (the VM has a wired NIC and no Bluetooth or sound card).
+- **CottonCandy, the browser (T-022, 2026-10-21):** the Chromium-based browser (CottonCandy-Browser, ADR 0007), now with the Grace UI and Phase 4's Grace panel: summarize, ask about a page, or explain an error, through the local `cherrycola` only, and hidden when `ai = off`.
+  - It's the default for http and https (`/etc/xdg/mimeapps.list`), and the dock pins it instead of Firefox.
+  - It was run by hand as a normal user under Xvfb, with the real `cherrycola` CLI against a stand-in Ollama server. The commands and what was seen are in that repo's README.
+  - The ISO CI on itsHarshDabas/GraceOS#7 built the package and booted the ISO (BIOS and UEFI), with the v0 browser.
+  - Not checked yet: CottonCandy on a booted ISO under Hyprland, and Grace with a real model.
 - **Builder VM vs host memory:** the VM takes 8 GB of the host's 15.4 GB and keeps being powered off under memory pressure. Run long builds with other heavy apps closed, or lower the VM to 6 GB.
 - **Real hardware:** not tried.
 - **CI can't clone the private candyland repo** (T-014).
