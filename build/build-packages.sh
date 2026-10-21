@@ -10,6 +10,7 @@ repo=$PWD/out/repo
 rm -rf "$repo"; mkdir -p "$repo"
 export CANDYLAND_COMMIT=$(cat iso/candyland.ref)
 export CHERRYSODA_COMMIT=$(cat iso/cherrysoda.ref)
+export COTTONCANDY_COMMIT=$(cat iso/cottoncandy.ref)
 
 for dir in packages/*/; do
   # -d: runtime dependencies are only needed on the target, not to package these.

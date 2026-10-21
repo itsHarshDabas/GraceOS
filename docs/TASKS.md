@@ -26,6 +26,7 @@ Each brief is meant to be pasted directly to a coding agent (Claude Code, OpenCo
 | T-019 | CherryCola: local model service and CLI (Ollama default, LM Studio supported) | [CherrySoda](https://github.com/itsHarshDabas/CherrySoda) repo | Harsh (Cline, reviewed by Claude) | review (works on the live ISO) | — |
 | T-020 | Stock Wine (wine, wine-mono, wine-gecko, winetricks) | `iso/` | Harsh (Claude) | done (wine notepad opens on the live ISO) | — |
 | T-021 | Low-end PCs: automatic lite mode, zram, and a Minimal install choice | `grace-candyland`, `iso/`, `installer/` | Harsh (Claude) | review (lite mode, zram, Full/Minimal built; Minimal install and RAM numbers not measured) | T-016 |
+| T-022 | CottonCandy: GraceOS's own Chromium-based browser (Qt 6 + QtWebEngine via PySide6), default for http/https | [CottonCandy-Browser](https://github.com/itsHarshDabas/CottonCandy-Browser) repo, ADR 0007 | Harsh (Claude) | review (v0 in CottonCandy-Browser `main`; packaged as `cottoncandy`, on the ISO in Full installs, default browser; ISO not rebuilt yet) | — |
 
 ---
 
@@ -95,3 +96,6 @@ A GTK4 + libadwaita + VTE terminal in Python, installed by grace-candyland. Tabs
 
 ### T-021 — Low-end PCs
 Lite mode turns off blur, shadows and animations automatically when there's no GPU or less than 4 GB of RAM. zram swap by default. `graceinstall` asks Full or Minimal; Minimal installs no desktop, CherryCola or Wine. Acceptance: idle RAM of the live desktop and of a Minimal install measured and recorded in PROJECT_STATUS.
+
+### T-022 — CottonCandy
+A Qt 6 + QtWebEngine (Chromium) browser in Python through PySide6, in CandySole's structure. Tabs, an address/search bar, back/forward/reload, downloads, history and bookmarks in SQLite, a `.desktop` file registered for `x-scheme-handler/http` and `https`. Page content is untrusted and page text never goes to a remote service; the optional "Summarize this page" uses only the local `cherrycola` CLI. Acceptance: on the live ISO, links from CandySole open in CottonCandy, two tabs browse independently, a download lands in `~/Downloads`, and history and bookmarks survive a restart.

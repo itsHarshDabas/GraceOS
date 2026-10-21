@@ -1,0 +1,28 @@
+# Maintainer: GraceOS <https://github.com/itsHarshDabas/GraceOS>
+# Builds the CottonCandy-Browser commit pinned in iso/cottoncandy.ref (build-packages.sh passes it in).
+pkgname=cottoncandy
+pkgver=r0
+pkgrel=1
+pkgdesc="CottonCandy: the GraceOS web browser (Chromium through Qt WebEngine)"
+arch=(any)
+url=https://github.com/itsHarshDabas/CottonCandy-Browser
+license=(LicenseRef-unspecified)
+depends=(python pyside6 qt6-webengine qt6-svg)
+optdepends=('xdg-utils: hand mailto: links to the mail app')
+makedepends=(git make)
+backup=(etc/xdg/mimeapps.list)
+source=("git+$url.git#commit=${COTTONCANDY_COMMIT:?set COTTONCANDY_COMMIT}"
+        mimeapps.list)
+sha256sums=(SKIP
+            c29c5b5055f96a530143cd3bb61bc5353092add17298a8e68f921b21bfcf62c4)
+
+pkgver() {
+  cd CottonCandy-Browser
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+}
+
+package() {
+  make -C CottonCandy-Browser install DESTDIR="$pkgdir" PREFIX=/usr
+  # The system default browser; a user's own ~/.config/mimeapps.list still wins.
+  install -Dm644 mimeapps.list "$pkgdir/etc/xdg/mimeapps.list"
+}

@@ -147,10 +147,11 @@ uv
 wget
 yay-bin
 zram-generator
-# --- GraceOS desktop: Grace Candyland (from the graceos repo) and what its controls use ---
+# --- GraceOS desktop: Grace Candyland and CottonCandy (from the graceos repo) and what they use ---
 bluez
 bluez-utils
 brightnessctl
+cottoncandy
 grace-candyland
 grim
 hyprsunset
