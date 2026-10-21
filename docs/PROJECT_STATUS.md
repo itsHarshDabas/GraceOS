@@ -93,6 +93,13 @@ _Last updated: 2026-10-19_
   - It was run by hand as a normal user under Xvfb, with the real `cherrycola` CLI against a stand-in Ollama server. The commands and what was seen are in that repo's README.
   - The ISO CI on itsHarshDabas/GraceOS#7 built the package and booted the ISO (BIOS and UEFI), with the v0 browser.
   - Not checked yet: CottonCandy on a booted ISO under Hyprland, and Grace with a real model.
+- **ToffeeTwirl IDE (T-023, 2026-10-21):** our VSCodium fork, built and released as `1.140.07069` by its own workflow, and packaged as `toffeetwirl` (ADR 0008).
+  - It has the command `twirl`, the Grace Dark and Light themes, and Grace (Explain Selection, Ask About This File, Ask) through the local `cherrycola` only, hidden when `ai = off`.
+  - The release tarball matched its published sha256. Run as a normal user under Xvfb:
+    - the window was titled "… - ToffeeTwirl IDE", with WM_CLASS `twirl` (the dock pin and `twirl.desktop`), in Grace Dark;
+    - "Grace: Explain Selection" sent one request to a stand-in Ollama server through the real `cherrycola` CLI, and showed its answer.
+  - The PKGBUILD's `package()` was run against the real tarball, and the new verify-iso checks passed on the result.
+  - Not checked yet: ToffeeTwirl on a booted ISO under Hyprland (the dock's running dot), and Grace with a real model.
 - **Builder VM vs host memory:** the VM takes 8 GB of the host's 15.4 GB and keeps being powered off under memory pressure. Run long builds with other heavy apps closed, or lower the VM to 6 GB.
 - **Real hardware:** not tried.
 - **CI can't clone the private candyland repo** (T-014).

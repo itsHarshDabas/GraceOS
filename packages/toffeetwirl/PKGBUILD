@@ -1,0 +1,36 @@
+# Maintainer: GraceOS <https://github.com/itsHarshDabas/GraceOS>
+# Repackages the ToffeeTwirl IDE release made by its repo's "ToffeeTwirl - Linux" workflow (ADR 0008).
+# To update: publish a new release there, then set pkgver and the tarball's sha256 (its .sha256 asset).
+pkgname=toffeetwirl
+pkgver=1.140.07069
+pkgrel=1
+pkgdesc="ToffeeTwirl IDE: the GraceOS IDE (VS Code built with VSCodium's scripts, Grace built in)"
+arch=(x86_64)
+url=https://github.com/itsHarshDabas/ToffeeTwirl-IDE
+license=(MIT)
+# VS Code's Linux runtime list (build/linux/debian/dep-lists.ts) as Arch packages, plus libsecret for the keyring.
+depends=(alsa-lib at-spi2-core cairo curl dbus expat glib2 glibc gtk3 libcups libsecret libx11 libxcb
+         libxcomposite libxdamage libxext libxfixes libxkbcommon libxkbfile libxrandr mesa nspr nss pango
+         systemd-libs xdg-utils)
+optdepends=(
+  'cherrycola: Grace, the local AI that explains code (from the GraceOS repo)'
+  'ttf-fira-code: the default editor font'
+)
+options=(!strip !debug)
+source=("$url/releases/download/$pkgver/ToffeeTwirl-linux-x64-$pkgver.tar.gz"
+        twirl.desktop
+        twirl-url-handler.desktop)
+noextract=("ToffeeTwirl-linux-x64-$pkgver.tar.gz")
+sha256sums=('651a5744e097d4740326d2f7adff73e709476fb60a4d4690f80e91ba89d9c112'
+            '553e49669a83fbb1f35bc1014492594ed1a5e00840b7557cfa988bb8f85653f2'
+            '0c7c01a5a11759f395a970e46e7671a36d66552f8fa7cf9b01d15179581bc28e')
+
+package() {
+  install -d "$pkgdir/opt/toffeetwirl" "$pkgdir/usr/bin"
+  bsdtar -xf "ToffeeTwirl-linux-x64-$pkgver.tar.gz" -C "$pkgdir/opt/toffeetwirl"
+  ln -s /opt/toffeetwirl/bin/twirl "$pkgdir/usr/bin/twirl"
+  install -Dm644 twirl.desktop "$pkgdir/usr/share/applications/twirl.desktop"
+  install -Dm644 twirl-url-handler.desktop "$pkgdir/usr/share/applications/twirl-url-handler.desktop"
+  install -Dm644 "$pkgdir/opt/toffeetwirl/resources/app/resources/linux/code.png" "$pkgdir/usr/share/pixmaps/toffeetwirl.png"
+  install -Dm644 "$pkgdir/opt/toffeetwirl/resources/app/LICENSE.txt" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

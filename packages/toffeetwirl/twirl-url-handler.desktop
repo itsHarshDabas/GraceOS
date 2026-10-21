@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=ToffeeTwirl IDE - URL Handler
+Comment=Opens toffeetwirl:// links, such as sign-in callbacks
+GenericName=Text Editor
+Exec=/usr/bin/twirl --open-url %U
+Icon=toffeetwirl
+Type=Application
+NoDisplay=true
+StartupNotify=true
+Categories=TextEditor;Development;IDE;
+MimeType=x-scheme-handler/toffeetwirl;
+Keywords=toffeetwirl;twirl;
