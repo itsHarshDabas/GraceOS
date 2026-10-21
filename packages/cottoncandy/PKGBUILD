@@ -8,7 +8,10 @@ arch=(any)
 url=https://github.com/itsHarshDabas/CottonCandy-Browser
 license=(LicenseRef-unspecified)
 depends=(python pyside6 qt6-webengine qt6-svg)
-optdepends=('xdg-utils: hand mailto: links to the mail app')
+optdepends=(
+  'xdg-utils: hand mailto: links to the mail app'
+  'cherrycola: Grace, the local AI that summarizes and answers about pages'
+)
 makedepends=(git make)
 backup=(etc/xdg/mimeapps.list)
 source=("git+$url.git#commit=${COTTONCANDY_COMMIT:?set COTTONCANDY_COMMIT}"
