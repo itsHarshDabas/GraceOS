@@ -27,6 +27,7 @@ Each brief is meant to be pasted directly to a coding agent (Claude Code, OpenCo
 | T-020 | Stock Wine (wine, wine-mono, wine-gecko, winetricks) | `iso/` | Harsh (Claude) | done (wine notepad opens on the live ISO) | — |
 | T-021 | Low-end PCs: automatic lite mode, zram, and a Minimal install choice | `grace-candyland`, `iso/`, `installer/` | Harsh (Claude) | review (lite mode, zram, Full/Minimal built; Minimal install and RAM numbers not measured) | T-016 |
 | T-022 | CottonCandy: GraceOS's own Chromium-based browser (Qt 6 + QtWebEngine via PySide6), default for http/https | [CottonCandy-Browser](https://github.com/itsHarshDabas/CottonCandy-Browser) repo, ADR 0007 | Harsh (Claude) | review (UI and the Grace panel built in CottonCandy-Browser; packaged as `cottoncandy`, on the ISO in Full installs, default browser, pinned in the dock; not yet checked on a booted ISO) | — |
+| T-023 | ToffeeTwirl IDE: GraceOS's IDE, VS Code built with VSCodium's scripts, with the Grace themes and local AI built in (`twirl`) | [ToffeeTwirl-IDE](https://github.com/itsHarshDabas/ToffeeTwirl-IDE) repo, `packages/toffeetwirl`, ADR 0008 | Harsh (Claude) | review (built and released by its workflow; packaged as `toffeetwirl`, on the ISO in Full installs, pinned in the dock; not yet opened on a booted ISO) | — |
 
 ---
 
@@ -99,3 +100,6 @@ Lite mode turns off blur, shadows and animations automatically when there's no G
 
 ### T-022 — CottonCandy
 A Qt 6 + QtWebEngine (Chromium) browser in Python through PySide6, in CandySole's structure. Tabs, an address/search bar, back/forward/reload, downloads, history and bookmarks in SQLite, a `.desktop` file registered for `x-scheme-handler/http` and `https`. Page content is untrusted and page text never goes to a remote service; the optional "Summarize this page" uses only the local `cherrycola` CLI. Acceptance: on the live ISO, links from CandySole open in CottonCandy, two tabs browse independently, a download lands in `~/Downloads`, and history and bookmarks survive a restart.
+
+### T-023 — ToffeeTwirl IDE
+Our VSCodium fork, renamed ToffeeTwirl IDE (command `twirl`), with a built-in `grace` extension: the Grace Dark and Light themes, and "Explain Selection", "Ask About This File" and "Ask" through the local `cherrycola` CLI only. Code is untrusted data and never goes to a remote service, and with `ai = off` every Grace touch disappears. The fork's workflow builds Linux x64 and publishes a release, which `packages/toffeetwirl` repackages (ADR 0008). Acceptance: on the live ISO, the dock opens ToffeeTwirl with its running dot, `twirl .` opens a folder in Grace Dark, and "Grace: Explain Selection" answers from the local model (or says the model isn't downloaded).

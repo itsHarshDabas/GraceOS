@@ -147,7 +147,7 @@ uv
 wget
 yay-bin
 zram-generator
-# --- GraceOS desktop: Grace Candyland and CottonCandy (from the graceos repo) and what they use ---
+# --- GraceOS desktop: Grace Candyland, CottonCandy and ToffeeTwirl (from the graceos repo) and what they use ---
 bluez
 bluez-utils
 brightnessctl
@@ -161,6 +161,7 @@ networkmanager
 pipewire
 pipewire-pulse
 power-profiles-daemon
+toffeetwirl
 upower
 wireplumber
 xdg-desktop-portal-hyprland
