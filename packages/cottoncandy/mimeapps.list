@@ -1,0 +1,7 @@
+# GraceOS: CottonCandy opens web links and HTML files. A user's own ~/.config/mimeapps.list
+# (Make CottonCandy the default browser, xdg-settings, or another browser's setting) still wins.
+[Default Applications]
+x-scheme-handler/http=org.graceos.CottonCandy.desktop
+x-scheme-handler/https=org.graceos.CottonCandy.desktop
+text/html=org.graceos.CottonCandy.desktop
+application/xhtml+xml=org.graceos.CottonCandy.desktop

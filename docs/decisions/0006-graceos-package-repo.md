@@ -10,6 +10,7 @@ Installed systems got Grace Candyland and the GraceOS `os-release` by copying fi
   - `graceos-release`: the GraceOS `os-release` (kept at `/usr/lib/graceos/os-release`), the desktop autostart on tty1, and the zram defaults.
   - `grace-candyland`: the desktop, at the commit pinned in `iso/candyland.ref`.
   - `cherrycola`: the local model CLI and chat app, at the [CherrySoda](https://github.com/itsHarshDabas/CherrySoda) commit pinned in `iso/cherrysoda.ref` (it lived in `services/cherrycola` until 2026-10-21).
+  - `cottoncandy`: the web browser (ADR 0007), at the [CottonCandy-Browser](https://github.com/itsHarshDabas/CottonCandy-Browser) commit pinned in `iso/cottoncandy.ref`. It also installs `/etc/xdg/mimeapps.list`, which makes it the default for web links; a user's own choice still wins.
   - `yay-bin`: the AUR helper, vendored unchanged from the AUR.
 - **Name guard:** `/usr/lib/os-release` belongs to Arch's `filesystem` package, so we don't fight over the file. A pacman hook in `graceos-release` copies the GraceOS version over it after every install or upgrade of `filesystem` (and of `graceos-release` itself).
 - `build/build-packages.sh` builds them into `out/repo`, a repo named `graceos`. The `packages` workflow runs it on every change and publishes the result as the `repo-x86_64` release, which is the repo's server URL.
