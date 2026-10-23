@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['packages/**', 'iso/candyland.ref', 'iso/cherrysoda.ref', 'iso/cottoncandy.ref', 'build/build-packages.sh', '.github/workflows/packages.yml']
+    paths: ['packages/**', 'iso/candyland.ref', 'iso/cherrysoda.ref', 'iso/cottoncandy.ref', 'iso/cortexcouncil.ref', 'build/build-packages.sh', '.github/workflows/packages.yml']
 permissions:
   contents: write
 concurrency: packages
@@ -17,7 +17,7 @@ jobs:
       - name: Build in Arch
         run: |
           docker run --rm -v "$PWD:/src" archlinux:latest bash -euc '
-            pacman -Syu --noconfirm --needed base-devel git make python
+            pacman -Syu --noconfirm --needed base-devel git make python nodejs npm
             useradd -m builder && chown -R builder /src
             su builder -c "git config --global --add safe.directory \"*\" && cd /src && build/build-packages.sh"'
       - name: Publish

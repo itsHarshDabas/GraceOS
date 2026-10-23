@@ -35,7 +35,7 @@ for b in git python node npm uv rg fd jq btop fastfetch tmux makepkg lspci sshd;
   check "tool $b" '[[ -e $sfs/usr/bin/$b || -L $sfs/usr/bin/$b ]]'
 done
 
-for b in Hyprland qs candysole nautilus nmcli wpctl grace-candyland grace-approve cherrycola cottoncandy twirl ollama yay wine winetricks; do
+for b in Hyprland qs candysole nautilus nmcli wpctl grace-candyland grace-approve cherrycola cortex-council cottoncandy twirl ollama yay wine winetricks; do
   check "tool $b" '[[ -e $sfs/usr/bin/$b || -L $sfs/usr/bin/$b ]]'
 done
 check "Grace Candyland session entry" '[[ -f $sfs/usr/share/wayland-sessions/grace-candyland.desktop ]]'
@@ -46,13 +46,14 @@ check "tty1 autologin is grace" 'grep -q -- "--autologin grace" "$sfs/etc/system
 check "tty1 login starts the desktop" 'grep -q grace-candyland "$sfs/etc/profile.d/grace-candyland.sh"'
 check "graceinstall is executable" '[[ -x $sfs/usr/local/bin/graceinstall ]]'
 check "graceinstall package list" '[[ $(grep -c . "$sfs/usr/share/graceinstall/packages") -gt 30 ]] && grep -qx grace-candyland "$sfs/usr/share/graceinstall/packages" && grep -q "\[minimal\]" "$sfs/usr/share/graceinstall/packages"'
-check "GraceOS packages installed" '(for p in graceos-release grace-candyland cherrycola cottoncandy toffeetwirl yay-bin; do ls -d "$sfs/var/lib/pacman/local/$p-"[0-9r]* >/dev/null 2>&1 || exit 1; done)'
+check "GraceOS packages installed" '(for p in graceos-release grace-candyland cherrycola cortex-council cottoncandy toffeetwirl yay-bin; do ls -d "$sfs/var/lib/pacman/local/$p-"[0-9r]* >/dev/null 2>&1 || exit 1; done)'
 # The hook put GraceOS's os-release in place; archiso then appends IMAGE_ID/IMAGE_VERSION, so compare the start.
 check "os-release guard hook" '[[ -f $sfs/usr/share/libalpm/hooks/graceos-release.hook ]] && head -c "$(stat -c %s "$sfs/usr/lib/graceos/os-release")" "$sfs/usr/lib/os-release" | cmp -s - "$sfs/usr/lib/graceos/os-release"'
 check "zram config" '[[ -f $sfs/usr/lib/systemd/zram-generator.conf ]]'
 check "lock screen" '[[ -f $sfs/usr/share/grace-candyland/shell/modules/Lock.qml && -e $sfs/usr/bin/hypridle ]]'
 check "CottonCandy is the default browser" 'grep -qx "x-scheme-handler/https=org.graceos.CottonCandy.desktop" "$sfs/etc/xdg/mimeapps.list" && [[ -f $sfs/usr/share/applications/org.graceos.CottonCandy.desktop ]]'
 check "ToffeeTwirl IDE with Grace built in" '[[ -f $sfs/usr/share/applications/twirl.desktop && -f $sfs/opt/toffeetwirl/resources/app/extensions/grace/package.json ]] && grep -q "\"nameLong\": \"ToffeeTwirl IDE\"" "$sfs/opt/toffeetwirl/resources/app/product.json"'
+check "Cortex Council app entry and built UI" '[[ -f $sfs/usr/share/applications/org.graceos.CortexCouncil.desktop && -x $sfs/usr/bin/grace-cortex && -f $sfs/usr/lib/cortex-council/dist/web/index.html ]]'
 check "sudoers drop-in is 0440 root" '[[ $(stat -c %a:%u "$sfs/etc/sudoers.d/10-grace-live") == 440:0 ]]'
 
 (( fails == 0 )) && echo "ALL CHECKS PASSED" || { echo "$fails check(s) failed"; exit 1; }
