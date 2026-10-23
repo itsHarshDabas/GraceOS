@@ -166,8 +166,9 @@ upower
 wireplumber
 xdg-desktop-portal-hyprland
 xdg-user-dirs
-# --- GraceOS AI: CherryCola runs models through Ollama, started on demand ---
+# --- GraceOS AI: CherryCola runs models through Ollama, started on demand; Cortex Council runs in the browser ---
 cherrycola
+cortex-council
 ollama
 # --- GraceOS Windows apps ---
 wine

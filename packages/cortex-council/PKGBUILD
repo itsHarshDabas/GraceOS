@@ -1,0 +1,41 @@
+# Maintainer: GraceOS <https://github.com/itsHarshDabas/GraceOS>
+# Builds the Cortex-Council commit pinned in iso/cortexcouncil.ref (build-packages.sh passes it in).
+pkgname=cortex-council
+pkgver=r0
+pkgrel=1
+pkgdesc="Cortex Council: an AI parliament in the browser where models debate a plan and nothing runs until you approve"
+arch=(x86_64)  # node_modules carries esbuild's native binary
+url=https://github.com/itsHarshDabas/Cortex-Council
+license=(MIT)
+depends=('nodejs>=22' git)
+optdepends=(
+  'xdg-utils: open it in the browser'
+  'grace-candyland: the Cortex Council app entry (grace-cortex)'
+  'cherrycola: a local model the council can seat, through Ollama'
+)
+makedepends=(git npm)
+source=("cortex-council::git+$url.git#commit=${CORTEXCOUNCIL_COMMIT:?set CORTEXCOUNCIL_COMMIT}")
+sha256sums=(SKIP)
+
+pkgver() {
+  cd cortex-council
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+}
+
+build() {
+  cd cortex-council
+  npm ci --no-audit --no-fund
+  npm run build
+  npm prune --omit=dev --no-audit --no-fund
+}
+
+package() {
+  cd cortex-council
+  # Read-only under /usr/lib, so the gateway keeps each user's config and data in ~/.local/share/cortex-council.
+  install -d "$pkgdir/usr/lib/cortex-council" "$pkgdir/usr/bin"
+  cp -r package.json bin scripts src dist node_modules "$pkgdir/usr/lib/cortex-council/"
+  find "$pkgdir/usr/lib/cortex-council/node_modules" -type d -empty -delete
+  ln -s /usr/lib/cortex-council/bin/cortex-council.mjs "$pkgdir/usr/bin/cortex-council"
+  install -Dm644 README.md "$pkgdir/usr/share/doc/cortex-council/README.md"
+  install -Dm644 cortex.config.example.json "$pkgdir/usr/share/doc/cortex-council/cortex.config.example.json"
+}
