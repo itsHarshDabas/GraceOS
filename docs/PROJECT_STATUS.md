@@ -102,7 +102,7 @@ _Last updated: 2026-10-19_
   - Not checked yet: ToffeeTwirl on a booted ISO under Hyprland (the dock's running dot), and Grace with a real model.
 - **Cortex Council (T-024, 2026-10-23):** packaged as `cortex-council` (Node app, UI prebuilt) and added to the ISO's Full package set; Candyland's `grace-cortex` app entry opens it in the browser.
   - The PKGBUILD's `build()` and `package()` steps were run by hand in a container (no makepkg there): the result is 32 MB under `/usr/lib/cortex-council`. Installed that way, `grace-cortex` run as an unprivileged user started the server in the background, opened the URL, kept data in `~/.local/share/cortex-council` and stopped it again.
-  - Not checked yet: a real makepkg build (the ISO CI does one), and Cortex Council on a booted ISO.
+  - The build-iso CI on itsHarshDabas/GraceOS#12 built the package with makepkg, passed verify-iso (app entry, `grace-cortex`, built UI) and booted the ISO (BIOS and UEFI). Not checked yet: Cortex Council on a booted ISO.
 - **Builder VM vs host memory:** the VM takes 8 GB of the host's 15.4 GB and keeps being powered off under memory pressure. Run long builds with other heavy apps closed, or lower the VM to 6 GB.
 - **Real hardware:** not tried.
 - **CI can't clone the private candyland repo** (T-014).
