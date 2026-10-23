@@ -104,6 +104,6 @@ A Qt 6 + QtWebEngine (Chromium) browser in Python through PySide6, in CandySole'
 
 ### T-023 — ToffeeTwirl IDE
 Our VSCodium fork, renamed ToffeeTwirl IDE (command `twirl`), with a built-in `grace` extension: the Grace Dark and Light themes, and "Explain Selection", "Ask About This File" and "Ask" through the local `cherrycola` CLI only. Code is untrusted data and never goes to a remote service, and with `ai = off` every Grace touch disappears. The fork's workflow builds Linux x64 and publishes a release, which `packages/toffeetwirl` repackages (ADR 0008). Acceptance: on the live ISO, the dock opens ToffeeTwirl with its running dot, `twirl .` opens a folder in Grace Dark, and "Grace: Explain Selection" answers from the local model (or says the model isn't downloaded).
+
 ### T-024 — Cortex Council
 Cortex Council's own cross-platform gateway (`cortex-council`) starts its local server on 127.0.0.1:7420 if it isn't running and opens it in a browser tab; the same command works on Windows and macOS from a checkout. `packages/cortex-council` bundles it with its npm dependencies and built UI under `/usr/lib/cortex-council`; each user's config and data live in `~/.local/share/cortex-council`. Candyland's `grace-cortex` and its app entry call it, and turn errors into notifications. It works without AI: the default council is five offline mock members. Acceptance: on the live ISO, Ask Grace → Cortex Council opens the chamber in CottonCandy, a motion runs to the approval gate with the mock council, and "Stop Cortex Council" stops the server.
-
