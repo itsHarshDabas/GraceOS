@@ -21,6 +21,6 @@ for npm, which doesn't suit ToffeeTwirl (a prebuilt release) or Cortex Council (
 
 ## Consequences
 - One key to guard (`GRACEOS_SIGNING_KEY`); it can sign the pacman repo later too.
-- What each release can install depends on its archive (Quickshell, PySide6 Qt WebEngine, Node 22); CI
+- What each release can install depends on its archive (Hyprland, Quickshell, PySide6 Qt WebEngine, Node 22); CI
   reports it, `docs/install-apt-dnf.md` keeps the table.
 - Ollama and the Updates & Software page stay Arch-only.

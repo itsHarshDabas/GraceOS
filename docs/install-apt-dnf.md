@@ -35,10 +35,10 @@ current answer; the table is what we expect:
 | `toffeetwirl` | yes | yes | yes | yes | yes |
 | `cottoncandy` | yes | yes | no: no PySide6 Qt WebEngine | yes | yes |
 | `cortex-council` | no: no Node 22 | yes (Node 24) | no: Node 18 | yes (Node 24) | yes (Node 22) |
-| `grace-candyland` | no: no Hyprland or Quickshell | yes | no: no Hyprland or Quickshell | yes | not yet (see CI) |
-| `grace-candyland-desktop` | no | yes | no | yes | not yet |
+| `grace-candyland` | no: no Hyprland or Quickshell | yes | no: no Hyprland or Quickshell | yes | no: Hyprland and hypridle aren't in its repos |
+| `grace-candyland-desktop` | no | yes | no | yes | no |
 
-From the `distro-packages` CI run on PR #25 (2026-11-23): "yes" means it installed from the repo and passed its smoke check.
+From the `distro-packages` CI run on PR #25 (2026-11-23, commit `eec9cd2`, all five images green): "yes" means it installed from the repo and passed its smoke check.
 
 
 Things that stay Arch-only: Ollama isn't in these archives (install it from https://ollama.com for
