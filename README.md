@@ -55,7 +55,9 @@ Boot the ISO and run `sudo graceinstall` in a terminal, or open **Install GraceO
 
 Neither includes Wine; add it after installing if you want Windows apps (below).
 
-Then pick the disk, user and password, review, and install. It wipes the disk you choose, so pick carefully. After installing, log in on the first console and the desktop starts.
+Then pick the disk, user and password, review, and install. After installing, log in on the first console and the desktop starts.
+
+**Next to Windows (dual boot):** graceinstall scans the disks first and, if Windows or another OS is there, offers to install alongside it in free space, reusing the EFI partition without formatting it. It stops before anything that holds data is erased unless you type the device name. Prepare Windows first (BitLocker key, Fast Startup off, Shrink Volume): see [docs/dual-boot.md](docs/dual-boot.md). If the live ISO shows a black screen, pick the **safe graphics** boot entry.
 
 ## Grace Candyland on an Arch system you already have
 Add the `[graceos]` repo and install `grace-candyland-desktop`, or install it from Arch's own ISO

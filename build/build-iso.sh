@@ -118,6 +118,7 @@ fi
 # graceinstall installs the same GraceOS package sets as this ISO (everything after the first GraceOS marker,
 # with the section markers kept so it can tell the Minimal set apart).
 install -Dm755 installer/graceinstall "$stage/airootfs/usr/local/bin/graceinstall"
+install -Dm644 installer/dualboot.py "$stage/airootfs/usr/share/graceinstall/dualboot.py"
 mkdir -p "$stage/airootfs/usr/share/graceinstall"
 sed -n '/^# --- GraceOS/,$p' iso/packages.x86_64 > "$stage/airootfs/usr/share/graceinstall/packages"
 
