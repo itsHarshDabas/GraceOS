@@ -3,7 +3,7 @@
 pkgname=cherrycola
 pkgver=r0
 pkgrel=1
-pkgdesc="CherryCola: local model inference for GraceOS (Ollama by default, LM Studio supported)"
+pkgdesc="CherryCola: local model inference for GraceOS (Ollama by default, LM Studio and llama.cpp supported)"
 arch=(any)
 url=https://github.com/itsHarshDabas/CherryCola
 license=(LicenseRef-unspecified)
