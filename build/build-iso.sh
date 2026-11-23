@@ -42,4 +42,6 @@ du -h "$work/mkarchiso/iso/arch/x86_64/airootfs.sfs" "$work"/mkarchiso/iso/arch/
 echo "-- largest packages on the ISO (installed size, MiB)"
 for d in "$work"/mkarchiso/x86_64/airootfs/var/lib/pacman/local/*/; do
   awk -v n="$(basename "$d")" '/^%SIZE%$/ { getline; printf "%8.1f  %s\n", $1 / 1048576, n }' "$d/desc"
-done | sort -rn | head -40
+done | sort -rn | sed -n 1,40p  # not head: it closes the pipe early, which pipefail counts as a failure
+echo "-- shared data"
+du -sh "$work"/mkarchiso/x86_64/airootfs/usr/share/{locale,man,doc,licenses} 2>/dev/null || true
