@@ -1,0 +1,5 @@
+Welcome to GraceOS Net (live) - an Arch-based AI/ML developer OS. Early development build.
+
+GraceOS Net downloads the Grace desktop and apps at first boot, so it needs the internet:
+Ethernet connects by itself; for Wi-Fi, grace-net-setup shows a menu (or use nmtui).
+If setup stopped, type grace-net-setup to carry on. graceinstall installs GraceOS to a disk.
