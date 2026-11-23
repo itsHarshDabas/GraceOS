@@ -4,10 +4,20 @@ An Arch Linux-based, AI-native operating system for AI/ML developers.
 
 **Status: early.** The live ISO is set up to start the GraceOS desktop, [Grace Candyland](https://github.com/itsHarshDabas/grace-candyland) (Hyprland with a Quickshell shell, see [ADR 0004](docs/decisions/0004-grace-candyland-desktop.md)). Nothing here is a finished feature. See [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) for what has actually been built and tested.
 
+![The Grace Candyland desktop: fastfetch and Cloudspin in CandySole terminals](docs/screenshots/graceos-desktop.png)
+
+## Apps that come with it
+These are preinstalled on the live ISO and in a Full install.
+
+| CottonCandy (browser) | CandySole (terminal) | ToffeeTwirl IDE |
+|---|---|---|
+| [![CottonCandy](docs/screenshots/cottoncandy.png)](docs/screenshots/cottoncandy.png) | [![CandySole](docs/screenshots/candysole.png)](docs/screenshots/candysole.png) | [![ToffeeTwirl IDE](docs/screenshots/toffeetwirl.png)](docs/screenshots/toffeetwirl.png) |
+| Chromium through Qt WebEngine, with Ask Grace in the address bar ([repo](https://github.com/itsHarshDabas/CottonCandy-Browser)). Run `cottoncandy`. | The GTK4 and VTE terminal from [Grace Candyland](https://github.com/itsHarshDabas/grace-candyland), with tabs and the Grace palette. Run `candysole`. | VS Code built with VSCodium's scripts, Grace Dark theme and Grace built in ([repo](https://github.com/itsHarshDabas/ToffeeTwirl-IDE)). Run `twirl`. |
+
 ## Download
 The [Latest release](https://github.com/itsHarshDabas/GraceOS/releases/latest) has the newest ISO that passed the build's checks and its BIOS and UEFI boot tests. Every push to `main` that changes the ISO replaces it.
-- GitHub limits release files to 2 GiB, so a bigger ISO comes in parts (`.part00`, `.part01`, …).
-- Download every part and the `.sha256` into one folder, then run `cat graceos-*.iso.part* > graceos-<date>-x86_64.iso` and `sha256sum -c graceos-*.iso.sha256`.
+- The ISO is one file of about 1.9 GB. Download `graceos-<date>-x86_64.iso` and its `.sha256` into one folder, then run `sha256sum -c graceos-*.iso.sha256`.
+- If a future ISO grows past GitHub's 2 GiB file limit, the release comes in parts (`.part00`, `.part01`, …) instead, and its notes show the `cat` command that joins them.
 
 ## Start here
 - [AGENTS.md](AGENTS.md): rules for humans and coding agents (Claude Code, OpenCode, Cline).
@@ -34,7 +44,7 @@ Create a VM (VMware, VirtualBox, virt-manager or QEMU) with **UEFI** firmware, 4
 
 ## Install GraceOS to a disk
 Boot the ISO and run `sudo graceinstall` in a terminal, or open **Install GraceOS** from Ask Grace (Super+Space). It's archinstall's guided installer with GraceOS defaults filled in (see [ADR 0005](docs/decisions/0005-graceinstall-on-archinstall.md)). It first asks which GraceOS:
-- **Full:** the Grace desktop, the CandySole terminal and CherryCola (local AI).
+- **Full:** the Grace desktop, the CandySole terminal, the CottonCandy browser, the ToffeeTwirl IDE and CherryCola (local AI).
 - **Minimal:** no desktop or AI; close to a bare Arch install, for old or small PCs.
 
 Neither includes Wine; add it after installing if you want Windows apps (below).
