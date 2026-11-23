@@ -57,6 +57,11 @@ Neither includes Wine; add it after installing if you want Windows apps (below).
 
 Then pick the disk, user and password, review, and install. It wipes the disk you choose, so pick carefully. After installing, log in on the first console and the desktop starts.
 
+## Grace Candyland on an Arch system you already have
+Add the `[graceos]` repo and install `grace-candyland-desktop`, or install it from Arch's own ISO
+with `archinstall`. The steps, and what's different from a GraceOS install, are in
+[docs/install-anywhere.md](docs/install-anywhere.md).
+
 ## Using GraceOS
 - **Packages:** `sudo pacman -S <name>` from Arch's repos, `yay -S <name>` from the AUR. `sudo pacman -Syu` updates everything, GraceOS's own packages included ([ADR 0006](docs/decisions/0006-graceos-package-repo.md)), and the system keeps its GraceOS name.
 - **Local AI:** `cherrycolallm pull` downloads a model sized for your RAM, then ask from Ask Grace (Super+Space) or with `cherrycolallm ask "..."` / `cherrycolallm chat`. It uses Ollama by default; with LM Studio's local server running, `cherrycolallm backend lmstudio` uses that instead. The old `cherrycola` command still works. Nothing runs or downloads until you ask.

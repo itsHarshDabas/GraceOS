@@ -1,0 +1,8 @@
+post_install() {
+  cat <<'MSG'
+==> Grace Candyland is installed.
+    Start it from a login screen (pick "Grace Candyland"), or type grace-candyland on a text console.
+    If they aren't on yet:  sudo systemctl enable --now NetworkManager bluetooth
+    Ask Grace needs a model: cherrycolallm pull (or open CherryColaLLM).
+MSG
+}
