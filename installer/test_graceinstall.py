@@ -17,13 +17,13 @@ yay-bin
 hyprland
 
 # --- GraceOS AI ---
-cherrycola
+cherrycolallm
 """
 
 
 def test_package_sets():
     full, minimal = gi.package_sets(PACKAGES)
-    assert full == ["git", "yay-bin", "hyprland", "cherrycola"]
+    assert full == ["git", "yay-bin", "hyprland", "cherrycolallm"]
     assert minimal == ["git", "yay-bin"]  # a plain comment doesn't end the [minimal] section
 
 
@@ -36,7 +36,7 @@ def test_full_with_user_override(tmp_path, monkeypatch):
 
     config, rest = gi.merged_config(["--full", "--config", str(user), "--silent"])
 
-    assert config["packages"] == ["git", "yay-bin", "hyprland", "cherrycola"]
+    assert config["packages"] == ["git", "yay-bin", "hyprland", "cherrycolallm"]
     assert config["hostname"] == "box"  # user wins
     assert config["network_config"] == {"type": "nm"}  # default kept
     assert config["mirror_config"]["custom_repositories"] == [gi.GRACEOS_REPO, mine]  # GraceOS repo always kept

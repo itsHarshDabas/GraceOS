@@ -50,7 +50,7 @@ Create a VM (VMware, VirtualBox, virt-manager or QEMU) with **UEFI** firmware, 4
 
 ## Install GraceOS to a disk
 Boot the ISO and run `sudo graceinstall` in a terminal, or open **Install GraceOS** from Ask Grace (Super+Space). It's archinstall's guided installer with GraceOS defaults filled in (see [ADR 0005](docs/decisions/0005-graceinstall-on-archinstall.md)). It first asks which GraceOS:
-- **Full:** the Grace desktop, the CandySole terminal, the CottonCandy browser, the ToffeeTwirl IDE and CherryCola (local AI).
+- **Full:** the Grace desktop, the CandySole terminal, the CottonCandy browser, the ToffeeTwirl IDE and CherryColaLLM (local AI).
 - **Minimal:** no desktop or AI; close to a bare Arch install, for old or small PCs.
 
 Neither includes Wine; add it after installing if you want Windows apps (below).
@@ -59,7 +59,7 @@ Then pick the disk, user and password, review, and install. It wipes the disk yo
 
 ## Using GraceOS
 - **Packages:** `sudo pacman -S <name>` from Arch's repos, `yay -S <name>` from the AUR. `sudo pacman -Syu` updates everything, GraceOS's own packages included ([ADR 0006](docs/decisions/0006-graceos-package-repo.md)), and the system keeps its GraceOS name.
-- **Local AI:** `cherrycola pull` downloads a model sized for your RAM, then ask from Ask Grace (Super+Space) or with `cherrycola ask "..."` / `cherrycola chat`. It uses Ollama by default; with LM Studio's local server running, `cherrycola backend lmstudio` uses that instead. Nothing runs or downloads until you ask.
+- **Local AI:** `cherrycolallm pull` downloads a model sized for your RAM, then ask from Ask Grace (Super+Space) or with `cherrycolallm ask "..."` / `cherrycolallm chat`. It uses Ollama by default; with LM Studio's local server running, `cherrycolallm backend lmstudio` uses that instead. The old `cherrycola` command still works. Nothing runs or downloads until you ask.
 - **Windows apps (optional):** Wine is not preinstalled. Run `grace-wine install` (or open **Install Windows App Support** from Ask Grace) to install `wine`, `wine-mono`, `wine-gecko` and `winetricks` from Arch's repos; then `wine setup.exe`, and `winetricks` for extra Windows components. `grace-wine remove` takes it out again.
 - **Lock the screen:** Super+L.
 
@@ -70,7 +70,7 @@ Then pick the disk, user and password, review, and install. It wipes the disk yo
 - `build/`: build, package-check, verify, boot, desktop and installer test scripts.
 - `installer/`: `graceinstall` and its tests (`python -m pytest installer/`).
 - `packages/`: PKGBUILDs for GraceOS's own packages; `build/build-packages.sh` builds them into the `graceos` repo.
-- CherryCola, the local model CLI and chat app, lives in its own repo, [CherryCola](https://github.com/itsHarshDabas/CherryCola) (called CherrySoda until 2026-11-23). GraceOS builds the commit pinned in `iso/cherrycola.ref`.
+- CherryColaLLM, the local model CLI and chat app, lives in its own repo, [CherryColaLLM](https://github.com/itsHarshDabas/CherryColaLLM) (called CherrySoda, then CherryCola, until 2026-11-23). GraceOS builds its `cherrycolallm` package from the commit pinned in `iso/cherrycolallm.ref`.
 - `docs/`: status, tasks, roadmap, architecture, decisions and vision.
 
 Line endings are LF everywhere (enforced by `.gitattributes`).

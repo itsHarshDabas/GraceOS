@@ -21,7 +21,7 @@ GRACEOS_REPO_URL=https://github.com/example/GraceOS/releases/download/net-repo-a
 LATEST_URL=https://github.com/example/GraceOS/releases/latest
 BUILT_FROM=abc1234,\ 2026-11-23
 EOF
-  printf '# --- GraceOS desktop ---\ngrace-candyland\ncottoncandy\n# --- GraceOS AI ---\ncherrycola\n' > "$w/net/packages"
+  printf '# --- GraceOS desktop ---\ngrace-candyland\ncottoncandy\n# --- GraceOS AI ---\ncherrycolallm\n' > "$w/net/packages"
   echo "[options]" > "$w/net/pacman.conf"
   for d in core extra graceos; do echo "$d" > "$w/net/sync/$d.db"; done
   touch "$w/cache/old.pkg.tar.zst"
@@ -83,7 +83,7 @@ expect() { if eval "$2"; then ok "$1"; else bad "$1"; sed 's/^/     | /' "$w/out
 make_world ethernet; touch "$FAKE/online"; run ""
 expect "ethernet: exits 0" '[[ $(cat $w/rc) == 0 ]]'
 expect "ethernet: installs all packages with the pinned pacman.conf and no -y" \
-  'grep -qxF "pacman --config $w/net/pacman.conf -S --needed --noconfirm grace-candyland cottoncandy cherrycola" "$FAKE/pacman.log" && ! grep -q -- "-Sy" "$FAKE/pacman.log"'
+  'grep -qxF "pacman --config $w/net/pacman.conf -S --needed --noconfirm grace-candyland cottoncandy cherrycolallm" "$FAKE/pacman.log" && ! grep -q -- "-Sy" "$FAKE/pacman.log"'
 expect "ethernet: ships the pinned databases into pacman's sync dir" '[[ $(cat "$w/sync/core.db" "$w/sync/extra.db" "$w/sync/graceos.db") == $(printf "core\nextra\ngraceos") ]]'
 expect "ethernet: initialises the keyring first" 'grep -q "start pacman-init.service" "$FAKE/systemctl.log"'
 expect "ethernet: reports sizes" 'grep -q "3 packages: 3 MiB to download, 6 MiB once installed" "$w/out"'

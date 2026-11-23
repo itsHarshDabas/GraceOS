@@ -9,7 +9,7 @@ Installed systems got Grace Candyland and the GraceOS `os-release` by copying fi
 - `packages/` holds the PKGBUILDs for what isn't in Arch's repos:
   - `graceos-release`: the GraceOS `os-release` (kept at `/usr/lib/graceos/os-release`), the desktop autostart on tty1, and the zram defaults.
   - `grace-candyland`: the desktop, at the commit pinned in `iso/candyland.ref`.
-  - `cherrycola`: the local model CLI and chat app, at the [CherryCola](https://github.com/itsHarshDabas/CherryCola) commit pinned in `iso/cherrycola.ref` (it lived in `services/cherrycola` until 2026-10-21).
+  - `cherrycolallm` (`cherrycola` until 2026-11-23; it provides and replaces that name): the local model CLI and chat app, at the [CherryColaLLM](https://github.com/itsHarshDabas/CherryColaLLM) commit pinned in `iso/cherrycolallm.ref` (it lived in `services/cherrycola` until 2026-10-21).
   - `cottoncandy`: the web browser (ADR 0007), at the [CottonCandy-Browser](https://github.com/itsHarshDabas/CottonCandy-Browser) commit pinned in `iso/cottoncandy.ref`. It also installs `/etc/xdg/mimeapps.list`, which makes it the default for web links; a user's own choice still wins.
   - `toffeetwirl`: the IDE (ADR 0008), repackaged from the [ToffeeTwirl-IDE](https://github.com/itsHarshDabas/ToffeeTwirl-IDE) release whose version and sha256 are in its PKGBUILD.
   - `cortex-council`: the AI parliament web app, at the [Cortex-Council](https://github.com/itsHarshDabas/Cortex-Council) commit pinned in `iso/cortexcouncil.ref`, with its npm dependencies and built UI bundled under `/usr/lib/cortex-council` (so it's `x86_64`, not `any`).

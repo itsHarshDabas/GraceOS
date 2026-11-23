@@ -69,7 +69,7 @@ def ask_edition(args: list[str]) -> tuple[str, list[str]]:
     if "--silent" in args:
         return "full", args
     print("Which GraceOS?\n"
-          "  1) Full: the Grace desktop, CandySole and CherryCola (local AI)\n"
+          "  1) Full: the Grace desktop, CandySole and CherryColaLLM (local AI)\n"
           "  2) Minimal: no desktop, close to a bare Arch install, for old or small PCs\n"
           "Either way, Windows app support (Wine) is optional: run `grace-wine install` after installing.")
     return ("minimal" if input("Choose 1 or 2 [1]: ").strip() == "2" else "full"), args
