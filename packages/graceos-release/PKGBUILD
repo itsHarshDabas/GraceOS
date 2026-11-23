@@ -1,15 +1,15 @@
 # Maintainer: GraceOS <https://github.com/itsHarshDabas/GraceOS>
 pkgname=graceos-release
-pkgver=2026.10.20
+pkgver=2026.11.23
 pkgrel=1
-pkgdesc="GraceOS identity (os-release kept through filesystem updates), fastfetch look, desktop autostart and zram defaults"
+pkgdesc="GraceOS identity (os-release kept through filesystem updates), fastfetch look, desktop autostart, zram defaults and grace-wine (optional Wine)"
 arch=(any)
 url=https://github.com/itsHarshDabas/GraceOS
 license=(LicenseRef-unspecified)
 depends=(filesystem)
 source=(os-release graceos-release.hook grace-candyland.sh zram-generator.conf
-        fastfetch.jsonc fastfetch-logo.txt)
-sha256sums=(SKIP SKIP SKIP SKIP SKIP SKIP)
+        fastfetch.jsonc fastfetch-logo.txt grace-wine grace-wine.desktop)
+sha256sums=(SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP)
 
 package() {
   install -Dm644 os-release "$pkgdir/usr/lib/graceos/os-release"
@@ -18,4 +18,6 @@ package() {
   install -Dm644 zram-generator.conf "$pkgdir/usr/lib/systemd/zram-generator.conf"
   install -Dm644 fastfetch.jsonc "$pkgdir/etc/xdg/fastfetch/config.jsonc"
   install -Dm644 fastfetch-logo.txt "$pkgdir/usr/share/graceos/fastfetch-logo.txt"
+  install -Dm755 grace-wine "$pkgdir/usr/bin/grace-wine"
+  install -Dm644 grace-wine.desktop "$pkgdir/usr/share/applications/org.graceos.GraceWine.desktop"
 }
