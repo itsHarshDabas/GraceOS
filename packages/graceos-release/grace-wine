@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# grace-wine: add or remove Windows app support (Wine) on an installed GraceOS.
+# Wine isn't on the ISO or in a fresh install; this installs Arch's own packages from `extra`
+# (Wine is WoW64, so no multilib is needed) when you want it.
+set -euo pipefail
+
+PACKAGES=(wine wine-gecko wine-mono winetricks)
+
+usage() {
+  cat <<USAGE
+usage: grace-wine [install|remove|status]
+  install   install Wine, wine-gecko, wine-mono and winetricks (the default)
+  remove    uninstall them again (your ~/.wine prefix is kept)
+  status    say whether Wine is installed
+USAGE
+}
+
+installed() { pacman -Q wine >/dev/null 2>&1; }
+
+# pacman needs root; ask through sudo unless we already are root.
+as_root() { if (( EUID == 0 )); then "$@"; else sudo "$@"; fi; }
+
+case ${1:-install} in
+  install)
+    if installed; then
+      echo "Wine is already installed ($(pacman -Q wine)). Run Windows programs with: wine setup.exe"
+      exit 0
+    fi
+    echo "Installing Windows app support: ${PACKAGES[*]}"
+    as_root pacman -S --needed "${PACKAGES[@]}"
+    echo
+    echo "Done. Run Windows programs with: wine setup.exe"
+    echo "Use winetricks for extra Windows components (fonts, runtimes)."
+    ;;
+  remove)
+    if ! installed; then echo "Wine is not installed."; exit 0; fi
+    mapfile -t present < <(pacman -Qq "${PACKAGES[@]}" 2>/dev/null || true)
+    as_root pacman -Rns "${present[@]}"
+    echo "Wine removed. Your Windows programs' files in ~/.wine were left in place."
+    ;;
+  status)
+    if installed; then echo "installed: $(pacman -Q wine)"; else echo "not installed (run: grace-wine install)"; exit 1; fi
+    ;;
+  -h|--help|help) usage ;;
+  *) usage >&2; exit 2 ;;
+esac

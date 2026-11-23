@@ -170,8 +170,3 @@ xdg-user-dirs
 cherrycola
 cortex-council
 ollama
-# --- GraceOS Windows apps ---
-wine
-wine-gecko
-wine-mono
-winetricks

@@ -34,15 +34,17 @@ Create a VM (VMware, VirtualBox, virt-manager or QEMU) with **UEFI** firmware, 4
 
 ## Install GraceOS to a disk
 Boot the ISO and run `sudo graceinstall` in a terminal, or open **Install GraceOS** from Ask Grace (Super+Space). It's archinstall's guided installer with GraceOS defaults filled in (see [ADR 0005](docs/decisions/0005-graceinstall-on-archinstall.md)). It first asks which GraceOS:
-- **Full:** the Grace desktop, the CandySole terminal, CherryCola (local AI) and Wine.
-- **Minimal:** no desktop, AI or Wine; close to a bare Arch install, for old or small PCs.
+- **Full:** the Grace desktop, the CandySole terminal and CherryCola (local AI).
+- **Minimal:** no desktop or AI; close to a bare Arch install, for old or small PCs.
+
+Neither includes Wine; add it after installing if you want Windows apps (below).
 
 Then pick the disk, user and password, review, and install. It wipes the disk you choose, so pick carefully. After installing, log in on the first console and the desktop starts.
 
 ## Using GraceOS
 - **Packages:** `sudo pacman -S <name>` from Arch's repos, `yay -S <name>` from the AUR. `sudo pacman -Syu` updates everything, GraceOS's own packages included ([ADR 0006](docs/decisions/0006-graceos-package-repo.md)), and the system keeps its GraceOS name.
 - **Local AI:** `cherrycola pull` downloads a model sized for your RAM, then ask from Ask Grace (Super+Space) or with `cherrycola ask "..."` / `cherrycola chat`. It uses Ollama by default; with LM Studio's local server running, `cherrycola backend lmstudio` uses that instead. Nothing runs or downloads until you ask.
-- **Windows apps:** `wine setup.exe`; `winetricks` for extra Windows components.
+- **Windows apps (optional):** Wine is not preinstalled. Run `grace-wine install` (or open **Install Windows App Support** from Ask Grace) to install `wine`, `wine-mono`, `wine-gecko` and `winetricks` from Arch's repos; then `wine setup.exe`, and `winetricks` for extra Windows components. `grace-wine remove` takes it out again.
 - **Lock the screen:** Super+L.
 
 `sudo build/install-test.py out/graceos-*.iso` tests the installer end to end inside QEMU: an unattended install onto a blank virtual disk, then a boot and login with a screenshot of the desktop.
