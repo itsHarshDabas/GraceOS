@@ -1,11 +1,11 @@
 # Maintainer: GraceOS <https://github.com/itsHarshDabas/GraceOS>
-# Builds the CherrySoda commit pinned in iso/cherrysoda.ref (build-packages.sh passes it in).
+# Builds the CherryCola commit pinned in iso/cherrycola.ref (build-packages.sh passes it in).
 pkgname=cherrycola
 pkgver=r0
 pkgrel=1
 pkgdesc="CherryCola: local model inference for GraceOS (Ollama by default, LM Studio supported)"
 arch=(any)
-url=https://github.com/itsHarshDabas/CherrySoda
+url=https://github.com/itsHarshDabas/CherryCola
 license=(LicenseRef-unspecified)
 depends=(python)
 optdepends=(
@@ -14,16 +14,16 @@ optdepends=(
   'libadwaita: the CherryCola chat app'
 )
 makedepends=(git)
-source=("git+$url.git#commit=${CHERRYSODA_COMMIT:?set CHERRYSODA_COMMIT}")
+source=("git+$url.git#commit=${CHERRYCOLA_COMMIT:?set CHERRYCOLA_COMMIT}")
 sha256sums=(SKIP)
 
 pkgver() {
-  cd CherrySoda
+  cd CherryCola
   printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
 }
 
 package() {
-  cd CherrySoda
+  cd CherryCola
   install -d "$pkgdir/usr/lib/cherrycola"
   cp -r cherrycola "$pkgdir/usr/lib/cherrycola/"
   find "$pkgdir/usr/lib/cherrycola" -name __pycache__ -prune -exec rm -rf {} +
