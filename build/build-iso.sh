@@ -33,11 +33,11 @@ while IFS=$'\t' read -r path target; do
 done < iso/symlinks.txt
 
 # GraceOS Net: the same profile with the desktop and app sections of packages.x86_64 left out.
-# The live system is built from one Arch Linux Archive day, and the ISO carries that day's package
+# The live system is built from one Arch Linux Archive day's databases, and the ISO carries that day's package
 # databases plus this build's graceos.db, so grace-net-setup downloads exactly those versions, and
 # pacman checks every file against the sha256 in those databases.
 net_profile() {
-  local rolling archive snap back first d net repo_url latest
+  local rolling archive snap back first d net repo_url latest dbs
   rolling=$(sed -n 's|^Server = \(.*/releases/download/repo-x86_64\)$|\1|p' iso/pacman.conf | head -1)
   if [[ -n ${ARCH_SNAPSHOT:-} ]]; then
     snap=$ARCH_SNAPSHOT
@@ -53,7 +53,19 @@ net_profile() {
   [[ -n ${snap:-} ]] || { echo "no Arch Linux Archive snapshot reachable"; exit 1; }
   archive=https://archive.archlinux.org/repos/$snap
   echo "GraceOS Net: Arch packages from $archive"
-  sed -i "s|^Include = /etc/pacman.d/mirrorlist\$|Server = $archive/\\\$repo/os/\\\$arch|" "$stage/pacman.conf"
+  # Each Arch repo gets three servers, tried in this order for every file:
+  #   1. file://$dbs, the archive day's databases, so the build (and the ISO) use exactly that day;
+  #   2. the normal mirrors, which still have most of that day's packages and are fast;
+  #   3. the archive day itself, for packages updated since (archive.archlinux.org is one server and
+  #      can be slow; it stalled the first CI run, hence DisableDownloadTimeout).
+  # pacman checks each file's sha256 against those databases, so a mirror can only serve the pinned file.
+  dbs=$work/net-sync
+  mkdir -p "$dbs"
+  for d in core extra; do
+    curl -fsSL --retry 5 -o "$dbs/$d.db" "$archive/$d/os/x86_64/$d.db"
+  done
+  sed -i -e "s|^Include = /etc/pacman.d/mirrorlist\$|Server = file://$dbs\n&\nServer = $archive/\\\$repo/os/\\\$arch|" \
+    -e 's|^\[options\]$|&\nDisableDownloadTimeout|' "$stage/pacman.conf"
 
   # Everything before the first non-[minimal] GraceOS section stays on the ISO, plus what it takes to
   # get online; the rest is downloaded.
@@ -66,9 +78,7 @@ net_profile() {
     printf '%s\n' "${on_iso[@]}"; } > "$stage/packages.x86_64"
   tail -n +"$first" iso/packages.x86_64 | grep -vxF -f <(printf '%s\n' "${on_iso[@]}") > "$net/packages"
 
-  for d in core extra; do
-    curl -fsSL --retry 5 -o "$net/sync/$d.db" "$archive/$d/os/x86_64/$d.db"
-  done
+  cp "$dbs"/core.db "$dbs"/extra.db "$net/sync/"
   if [[ -n ${NET_REPO_URL:-} ]]; then
     [[ -e out/repo/graceos.db ]] || { echo "NET_REPO_URL needs this build's packages in out/repo (build/build-packages.sh)"; exit 1; }
     repo_url=$NET_REPO_URL
@@ -80,7 +90,9 @@ net_profile() {
     curl -fsSL --retry 5 -o "$net/sync/graceos.db" "$rolling/graceos.db"
   fi
   # The downloads use the build's pacman.conf (snapshot servers, NoExtract for docs and locales).
-  sed "/^\[graceos\]/,/^Server/ s|^Server = .*|Server = $repo_url|" "$stage/pacman.conf" > "$net/pacman.conf"
+  # (Without the build's file:// database server: the live system already has those databases.)
+  sed -e "\|^Server = file://$dbs\$|d" -e "/^\[graceos\]/,/^Server/ s|^Server = .*|Server = $repo_url|" \
+    "$stage/pacman.conf" > "$net/pacman.conf"
   latest=${rolling%/releases/download/*}/releases/latest
   { printf 'ARCH_ARCHIVE=%q\n' "$archive"
     printf 'GRACEOS_REPO_URL=%q\n' "$repo_url"

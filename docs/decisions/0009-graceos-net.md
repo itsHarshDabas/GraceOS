@@ -26,7 +26,10 @@ What Harsh asked for:
   - It renames the image `graceos-net-<date>-x86_64.iso` (label `GRACEOS_NET_*`, boot entries "GraceOS Net live medium").
   - The Full build is unchanged.
 - **Pinning.**
-  - The Arch servers in the build's `pacman.conf` point at the archive day: yesterday (UTC), or the most recent day that exists, or `ARCH_SNAPSHOT=YYYY/MM/DD`.
+  - The archive day is yesterday (UTC), or the most recent day that exists, or `ARCH_SNAPSHOT=YYYY/MM/DD`.
+  - In the build's `pacman.conf`, each Arch repo lists the normal mirrors first, then the archive day.
+    - The shipped databases fix the version of every package, and pacman checks each file's sha256 against them, so a mirror can only serve the exact pinned file.
+    - Mirrors have most of those files (only packages updated since that day are gone) and are much faster. `archive.archlinux.org` is one server and stalled in the first CI run, so it serves only the rest.
   - `/usr/share/graceos-net/pacman.conf` is that same file with `[graceos]` pointing at `NET_REPO_URL`. In CI that is the `net-repo-<sha7>` release, which `publish-iso.sh` creates from the packages built in the same run.
   - `/usr/share/graceos-net/sync/` holds `core.db`, `extra.db` and `graceos.db`.
 - **Verification.**
@@ -52,5 +55,5 @@ What Harsh asked for:
   - The size is not measured yet; the first CI build reports it.
   - The setup's "at least 6 GB" advice is an estimate until it's measured on a booted ISO.
 - A Net ISO stops being able to finish setup once its `net-repo-*` release is pruned, after five newer builds. Setup then says so and links the latest ISO. `graceinstall` still works from it, because it installs from current mirrors like the Full ISO.
-- The Net build downloads the base from `archive.archlinux.org`, which is a single server and slower than the mirrors, so CI builds take longer.
+- Packages updated since the archive day come from `archive.archlinux.org`, a single server that can be slow. pacman moves on to the next server for a file that fails, and `grace-net-setup` retries the whole install.
 - `graceinstall` is unchanged. An installed system uses the normal mirrors and the rolling `[graceos]` repo, not the pinned snapshot.

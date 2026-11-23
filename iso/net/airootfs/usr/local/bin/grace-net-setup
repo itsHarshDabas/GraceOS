@@ -5,7 +5,8 @@
 # Grace Settings, Cortex Council) and installs them into the live session. The desktop starts after it.
 #
 # What it downloads is pinned when the ISO is built (see docs/decisions/0009-graceos-net.md):
-#   - Arch packages from the Arch Linux Archive snapshot the ISO itself was built from;
+#   - Arch packages at the versions of the Arch Linux Archive day the ISO was built from (from the
+#     mirrors when they still have that version, else from the archive);
 #   - GraceOS packages from the release the build published next to the ISO;
 #   - the package databases (with every package's sha256) ship inside the ISO, so pacman checks
 #     each download against them and checks Arch's signatures as usual.
@@ -41,10 +42,11 @@ mapfile -t packages < <(grep -v '^\s*#' "$NET/packages" | grep .)
 
 # HTTP status of a HEAD request ("000" when there is no answer at all).
 status() { curl -sS -o /dev/null -I -L --max-time 15 -w '%{http_code}' "$1" 2>/dev/null || true; }
-# Online = the Arch archive serves the pinned day and GitHub answers at all (a 404 there is a
-# missing release, which check_published explains, not a missing connection).
+# Online = GitHub answers at all (a 404 there is a missing release, which check_published explains,
+# not a missing connection). Arch packages come from the mirrors, or the archive day when a mirror
+# no longer has that version.
 online() {
-  [[ $(status "$ARCH_ARCHIVE/core/os/x86_64/core.db") == 2* ]] && [[ $(status "$GRACEOS_REPO_URL/graceos.db") != 000 ]]
+  [[ $(status "$GRACEOS_REPO_URL/graceos.db") != 000 ]]
 }
 
 connect_wifi() {
@@ -101,7 +103,6 @@ ensure_network() {
       *) continue ;;
     esac
     say "Checking..."
-    local n
     for _ in 1 2 3 4 5; do online && break; sleep 2; done
   done
   say "Connected."
