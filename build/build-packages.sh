@@ -9,7 +9,7 @@ cd "$(dirname "$0")/.."
 repo=$PWD/out/repo
 rm -rf "$repo"; mkdir -p "$repo"
 export CANDYLAND_COMMIT=$(cat iso/candyland.ref)
-export CHERRYCOLA_COMMIT=$(cat iso/cherrycola.ref)
+export CHERRYCOLALLM_COMMIT=$(cat iso/cherrycolallm.ref)
 export COTTONCANDY_COMMIT=$(cat iso/cottoncandy.ref)
 export CORTEXCOUNCIL_COMMIT=$(cat iso/cortexcouncil.ref)
 

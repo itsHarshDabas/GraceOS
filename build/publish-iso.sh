@@ -76,7 +76,7 @@ Everything is on the ISO, so the live desktop works without the internet.
 $get_full
 
 ### GraceOS Net: \`$(basename "$net")\` ($(mib "$net") MiB)
-The smaller, online image: it carries the base system only. At first boot it connects to the internet (Ethernet by itself, Wi-Fi from a menu), downloads the Grace Candyland desktop and the GraceOS apps (CottonCandy, CandySole, ToffeeTwirl, CherryCola, Ask Grace, Grace Settings, Cortex Council), then starts the desktop. It needs the internet, and enough RAM to hold the downloaded desktop (setup checks and tells you). What it downloads is pinned to this build: Arch packages from that day's Arch Linux Archive snapshot and GraceOS packages from the [\`$net_tag\`](https://github.com/$REPO/releases/tag/$net_tag) release, each checked against the package databases on the ISO.
+The smaller, online image: it carries the base system only. At first boot it connects to the internet (Ethernet by itself, Wi-Fi from a menu), downloads the Grace Candyland desktop and the GraceOS apps (CottonCandy, CandySole, ToffeeTwirl, CherryColaLLM, Ask Grace, Grace Settings, Cortex Council), then starts the desktop. It needs the internet, and enough RAM to hold the downloaded desktop (setup checks and tells you). What it downloads is pinned to this build: Arch packages from that day's Arch Linux Archive snapshot and GraceOS packages from the [\`$net_tag\`](https://github.com/$REPO/releases/tag/$net_tag) release, each checked against the package databases on the ISO.
 
 $get_net
 

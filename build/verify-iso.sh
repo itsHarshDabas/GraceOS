@@ -52,7 +52,7 @@ net_checks() {
   check "download pacman.conf: mirrors, then the Arch Linux Archive, and the pinned GraceOS repo" '(. "$net/net.conf"; grep -A2 -x "Include = /etc/pacman.d/mirrorlist" "$net/pacman.conf" | grep -Eq "^Server = https://archive.archlinux.org/repos/[0-9]{4}/[0-9]{2}/[0-9]{2}/\\\$repo/os/\\\$arch$" && grep -qxF "Server = $GRACEOS_REPO_URL" "$net/pacman.conf") && ! grep -q "^Server = file://" "$net/pacman.conf"'
   check "the build-time database hook removed itself" '[[ ! -e $sfs/etc/pacman.d/hooks/zzzz98-graceos-net-keep-databases.hook ]]'
   for db in core extra graceos; do check "pinned $db database on the ISO" '[[ -s $net/sync/$db.db ]]'; done
-  for p in grace-candyland cottoncandy toffeetwirl cherrycola cortex-council ollama; do
+  for p in grace-candyland cottoncandy toffeetwirl cherrycolallm cortex-council ollama; do
     check "downloads $p" 'grep -qx "$p" "$net/packages"'
   done
   # Every download resolves in the pinned databases (pacman -Sp only prints URLs; nothing is fetched).
@@ -64,13 +64,13 @@ net_checks() {
 }
 
 full_checks() {
-  for b in Hyprland qs candysole nautilus nmcli wpctl grace-candyland grace-approve cherrycola cortex-council cottoncandy twirl ollama yay grace-wine; do
+  for b in Hyprland qs candysole nautilus nmcli wpctl grace-candyland grace-approve cherrycolallm cherrycola cortex-council cottoncandy twirl ollama yay grace-wine; do
     check "tool $b" '[[ -e $sfs/usr/bin/$b || -L $sfs/usr/bin/$b ]]'
   done
   check "Grace Candyland session entry" '[[ -f $sfs/usr/share/wayland-sessions/grace-candyland.desktop ]]'
   check "Grace shell installed" '[[ -f $sfs/usr/share/grace-candyland/shell/shell.qml ]]'
   check "grace-* commands are executable" '[[ -x $sfs/usr/bin/grace-candyland && -x $sfs/usr/bin/grace-approve && -x $sfs/usr/bin/grace-launch && -x $sfs/usr/bin/grace-settings ]]'
-  check "GraceOS packages installed" '(for p in graceos-release grace-candyland cherrycola cortex-council cottoncandy toffeetwirl yay-bin; do ls -d "$sfs/var/lib/pacman/local/$p-"[0-9r]* >/dev/null 2>&1 || exit 1; done)'
+  check "GraceOS packages installed" '(for p in graceos-release grace-candyland cherrycolallm cortex-council cottoncandy toffeetwirl yay-bin; do ls -d "$sfs/var/lib/pacman/local/$p-"[0-9r]* >/dev/null 2>&1 || exit 1; done)'
   check "lock screen" '[[ -f $sfs/usr/share/grace-candyland/shell/modules/Lock.qml && -e $sfs/usr/bin/hypridle ]]'
   check "CottonCandy is the default browser" 'grep -qx "x-scheme-handler/https=org.graceos.CottonCandy.desktop" "$sfs/etc/xdg/mimeapps.list" && [[ -f $sfs/usr/share/applications/org.graceos.CottonCandy.desktop ]]'
   check "ToffeeTwirl IDE with Grace built in" '[[ -f $sfs/usr/share/applications/twirl.desktop && -f $sfs/opt/toffeetwirl/resources/app/extensions/grace/package.json ]] && grep -q "\"nameLong\": \"ToffeeTwirl IDE\"" "$sfs/opt/toffeetwirl/resources/app/product.json"'

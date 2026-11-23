@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # grace-net-setup: GraceOS Net's first-boot step. The Net ISO carries only the base system; this
 # connects to the internet (Ethernet by itself, Wi-Fi from a menu), downloads the Grace Candyland
-# desktop and the GraceOS apps (CottonCandy, CandySole, ToffeeTwirl, CherryCola, Ask Grace,
+# desktop and the GraceOS apps (CottonCandy, CandySole, ToffeeTwirl, CherryColaLLM, Ask Grace,
 # Grace Settings, Cortex Council) and installs them into the live session. The desktop starts after it.
 #
 # What it downloads is pinned when the ISO is built (see docs/decisions/0009-graceos-net.md):
