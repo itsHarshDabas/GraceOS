@@ -77,3 +77,24 @@ def test_dedupe_keeps_the_first_copy_of_each_section(tmp_path):
     subprocess.run(["sh", "-c", gi.DEDUPE_PACMAN_CONF.replace("/etc/", f"{tmp_path.as_posix()}/etc/")], check=True)
     assert conf.read_text() == ("[options]\nColor\n\n[core]\nInclude = m\n\n[graceos]\nServer = a\n\n"
                                 "[mine]\nServer = b\n\n")
+
+
+def test_gpu_packages_only_for_full(tmp_path, monkeypatch):
+    (tmp_path / "packages").write_text(PACKAGES)
+    monkeypatch.setattr(gi, "SHARE", tmp_path)
+    rtx = [("0x030000", "0x10de", "0x2684")]
+    full = gi.defaults("full", rtx)
+    assert full["packages"][-3:] == ["nvidia-open", "nvidia-utils", "libva-nvidia-driver"]
+    assert any("nvidia_drm modeset=1" in c for c in full["custom_commands"])
+    assert full["custom_commands"][0] == gi.DEDUPE_PACMAN_CONF
+    minimal = gi.defaults("minimal", rtx)
+    assert minimal["packages"] == ["git", "yay-bin"] and minimal["custom_commands"] == [gi.DEDUPE_PACMAN_CONF]
+
+
+def test_graceinstall_flags_are_not_passed_to_archinstall(tmp_path, monkeypatch):
+    (tmp_path / "packages").write_text(PACKAGES)
+    monkeypatch.setattr(gi, "SHARE", tmp_path)
+    allowed, rest = gi.take_flag(["--allow-erase", "/dev/sda", "--silent", "--allow-erase", "/dev/sdb"], "--allow-erase", True)
+    assert allowed == ["/dev/sda", "/dev/sdb"] and rest == ["--silent"]
+    config, rest = gi.merged_config(["--full", "--rtc-local", "--silent"])
+    assert rest == ["--silent"] and config["custom_commands"][-1] == gi.dualboot.RTC_LOCAL_COMMAND

@@ -24,6 +24,7 @@ check "ISO under 2 GiB ($(( $(stat -c %s "$iso") / 1048576 )) MiB)" '(( $(stat -
 check "volume label is GRACEOS_*" '[[ $(blkid -o value -s LABEL "$iso") == GRACEOS_* ]]'
 check "UEFI boot entries say GraceOS" 'grep -q "^title *GraceOS" "$mnt"/loader/entries/01-archiso-linux.conf'
 check "BIOS boot menu says GraceOS" 'grep -q "MENU LABEL GraceOS" "$mnt"/boot/syslinux/archiso_sys-linux.cfg'
+check "safe graphics boot entries (nomodeset)" 'grep -q nomodeset "$mnt"/loader/entries/01-archiso-linux-safe-graphics.conf && grep -q "nomodeset" "$mnt"/boot/syslinux/archiso_sys-linux.cfg'
 check "no leftover Arch install-medium titles" '! grep -rqs "Arch Linux install medium" "$mnt/loader" "$mnt/boot/syslinux"'
 check "hostname is graceos" '[[ $(cat "$sfs/etc/hostname") == graceos ]]'
 check "os-release says GraceOS (ID_LIKE=arch)" 'grep -q "^NAME=\"GraceOS\"" "$sfs/usr/lib/os-release" && grep -q "^ID_LIKE=arch" "$sfs/usr/lib/os-release"'
@@ -84,6 +85,7 @@ check "live user grace (uid 1000, wheel)" 'grep -q "^grace:x:1000:1000:" "$sfs/e
 check "tty1 autologin is grace" 'grep -q -- "--autologin grace" "$sfs/etc/systemd/system/getty@tty1.service.d/autologin.conf"'
 check "tty1 login starts the desktop" 'grep -q grace-candyland "$sfs/etc/profile.d/grace-candyland.sh"'
 check "graceinstall is executable" '[[ -x $sfs/usr/local/bin/graceinstall ]]'
+check "graceinstall dual-boot module" 'grep -q "def install_guard" "$sfs/usr/share/graceinstall/dualboot.py"'
 check "graceinstall package list" '[[ $(grep -c . "$sfs/usr/share/graceinstall/packages") -gt 30 ]] && grep -qx grace-candyland "$sfs/usr/share/graceinstall/packages" && grep -q "\[minimal\]" "$sfs/usr/share/graceinstall/packages"'
 # The hook put GraceOS's os-release in place; archiso then appends IMAGE_ID/IMAGE_VERSION, so compare the start.
 check "os-release guard hook" '[[ -f $sfs/usr/share/libalpm/hooks/graceos-release.hook ]] && head -c "$(stat -c %s "$sfs/usr/lib/graceos/os-release")" "$sfs/usr/lib/os-release" | cmp -s - "$sfs/usr/lib/graceos/os-release"'
