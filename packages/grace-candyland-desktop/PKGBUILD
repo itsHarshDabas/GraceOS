@@ -1,0 +1,29 @@
+# Maintainer: GraceOS <https://github.com/itsHarshDabas/GraceOS>
+# One package for the whole GraceOS desktop on any Arch system: Grace Candyland, the GraceOS apps,
+# local AI and everything Grace Settings' pages use. It leaves the system's name alone
+# (that is graceos-release, which only GraceOS itself installs).
+pkgname=grace-candyland-desktop
+pkgver=2026.11.23
+pkgrel=1
+pkgdesc="The full Grace Candyland desktop on any Arch system: the Grace shell, CottonCandy, ToffeeTwirl, CherryColaLLM, Cortex Council and what Grace Settings needs"
+arch=(any)
+url=https://github.com/itsHarshDabas/GraceOS
+license=(LicenseRef-unspecified)
+depends=(
+  # GraceOS
+  grace-candyland cottoncandy toffeetwirl cherrycolallm cortex-council
+  # Local AI for Ask Grace, CherryColaLLM and Cortex Council (CPU build; swap for ollama-cuda/-rocm/-vulkan)
+  ollama
+  # Grace Settings pages and bar controls
+  networkmanager bluez bluez-utils pipewire pipewire-pulse wireplumber upower power-profiles-daemon
+  brightnessctl hyprsunset
+  # Screenshots, notifications, portals, files
+  grim libnotify xdg-desktop-portal-hyprland nautilus xdg-user-dirs
+  # The CherryColaLLM chat app
+  python-gobject libadwaita
+)
+optdepends=(
+  'graceos-release: GraceOS branding, desktop autostart on tty1, zram defaults and grace-wine (GraceOS installs only)'
+  'sddm: a login screen that offers the Grace Candyland session'
+)
+install=grace-candyland-desktop.install

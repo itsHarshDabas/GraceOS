@@ -1,0 +1,47 @@
+diff --git a/archinstall/lib/profile/profiles_handler.py b/archinstall/lib/profile/profiles_handler.py
+index d09364f..e3031d4 100644
+--- a/archinstall/lib/profile/profiles_handler.py
++++ b/archinstall/lib/profile/profiles_handler.py
+@@ -265,6 +265,7 @@ class ProfileHandler:
+ 
+ 			profiles = self._process_profile_file(filepath)
+ 			self.remove_custom_profiles(profiles)
++			self.add_custom_profiles(profiles)
+ 
+ 	def _load_profile_class(self, module: ModuleType) -> list[Profile]:
+ 		"""
+diff --git a/tests/test_profile_url.py b/tests/test_profile_url.py
+new file mode 100644
+index 0000000..ceead2c
+--- /dev/null
++++ b/tests/test_profile_url.py
+@@ -0,0 +1,29 @@
++from pytest import MonkeyPatch
++
++from archinstall.lib.profile.profiles_handler import ProfileHandler
++
++_PROFILE = b"""
++from archinstall.default_profiles.profile import Profile, ProfileType
++
++
++class UrlProfile(Profile):
++	def __init__(self) -> None:
++		super().__init__('Url Profile', ProfileType.DesktopEnv)
++"""
++
++
++def test_profile_from_url_is_available(monkeypatch: MonkeyPatch) -> None:
++	monkeypatch.setattr('archinstall.lib.profile.profiles_handler.fetch_data_from_url', lambda _url: _PROFILE)
++	handler = ProfileHandler()
++
++	profile = handler.parse_profile_config(
++		{
++			'main': 'Desktop',
++			'details': ['Url Profile'],
++			'path': 'https://example.com/url_profile.py',
++		}
++	)
++
++	assert handler.get_profile_by_name('Url Profile') is not None
++	assert profile is not None
++	assert [p.name for p in profile.current_selection] == ['Url Profile']
