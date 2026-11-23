@@ -23,7 +23,7 @@ work=${WORK_DIR:-/var/tmp/graceos-work}
 if [[ -d $work ]] && ! grep -q " $work" /proc/mounts; then rm -rf "$work"; fi
 
 files=("$iso.sha256")
-if (( $(stat -c %s "$iso") < 2000000000 )); then
+if (( $(stat -c %s "$iso") < 2147483648 )); then
   files+=("$iso")
   get="Download \`$name\` and \`$name.sha256\`, then check it:
 \`\`\`sh

@@ -16,6 +16,8 @@ fails=0
 check() { if eval "$2"; then echo "ok   $1"; else echo "FAIL $1"; fails=$((fails+1)); fi; }
 
 check "sha256 matches" '[[ ! -f $iso.sha256 ]] || (cd "$(dirname "$iso")" && sha256sum -c --quiet "$(basename "$iso").sha256")'
+# GitHub refuses release files of 2 GiB or more; under that, the release is one ISO download.
+check "ISO under 2 GiB ($(( $(stat -c %s "$iso") / 1048576 )) MiB)" '(( $(stat -c %s "$iso") < 2147483648 ))'
 check "volume label is GRACEOS_*" '[[ $(blkid -o value -s LABEL "$iso") == GRACEOS_* ]]'
 check "UEFI boot entries say GraceOS" 'grep -q "^title *GraceOS" "$mnt"/loader/entries/01-archiso-linux.conf'
 check "BIOS boot menu says GraceOS" 'grep -q "MENU LABEL GraceOS" "$mnt"/boot/syslinux/archiso_sys-linux.cfg'

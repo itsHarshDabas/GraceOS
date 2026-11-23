@@ -35,3 +35,11 @@ mkarchiso -v -w "$work/mkarchiso" -o out "$stage"
 iso=$(ls -t out/graceos-*.iso | head -1)
 ( cd out && sha256sum "$(basename "$iso")" > "$(basename "$iso").sha256" )
 ls -lh out
+
+# Where the size goes: GitHub release files must stay under 2 GiB (verify-iso.sh checks it).
+echo "== ISO size report"
+du -h "$work/mkarchiso/iso/arch/x86_64/airootfs.sfs" "$work"/mkarchiso/iso/arch/boot/x86_64/* "$work"/mkarchiso/efiboot.img 2>/dev/null || true
+echo "-- largest packages on the ISO (installed size, MiB)"
+for d in "$work"/mkarchiso/x86_64/airootfs/var/lib/pacman/local/*/; do
+  awk -v n="$(basename "$d")" '/^%SIZE%$/ { getline; printf "%8.1f  %s\n", $1 / 1048576, n }' "$d/desc"
+done | sort -rn | head -40
