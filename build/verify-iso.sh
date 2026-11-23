@@ -49,8 +49,8 @@ net_checks() {
   check "tty1 login runs grace-net-setup before the desktop" '[[ -f $sfs/etc/profile.d/00-grace-net.sh ]] && grep -q grace-net-setup "$sfs/etc/profile.d/00-grace-net.sh"'
   check "Net MOTD" 'grep -q "GraceOS Net" "$sfs/etc/motd"'
   check "boot entries say GraceOS Net and enlarge the live overlay" 'grep -q "^title *GraceOS Net" "$mnt"/loader/entries/01-archiso-linux.conf && grep -q "cow_spacesize=75%" "$mnt"/loader/entries/01-archiso-linux.conf "$mnt"/boot/syslinux/archiso_sys-linux.cfg'
-  check "net.conf pins an Arch Linux Archive day" 'grep -Eq "^ARCH_ARCHIVE=https://archive.archlinux.org/repos/[0-9]{4}/[0-9]{2}/[0-9]{2}$" "$net/net.conf"'
-  check "download pacman.conf uses that day and the pinned GraceOS repo" '(. "$net/net.conf"; grep -qF "Server = $ARCH_ARCHIVE/\$repo/os/\$arch" "$net/pacman.conf" && grep -qxF "Server = $GRACEOS_REPO_URL" "$net/pacman.conf") && ! grep -q "^Server = file://" "$net/pacman.conf"'
+  check "download pacman.conf: mirrors, then the Arch Linux Archive, and the pinned GraceOS repo" '(. "$net/net.conf"; grep -A2 -x "Include = /etc/pacman.d/mirrorlist" "$net/pacman.conf" | grep -Eq "^Server = https://archive.archlinux.org/repos/[0-9]{4}/[0-9]{2}/[0-9]{2}/\\\$repo/os/\\\$arch$" && grep -qxF "Server = $GRACEOS_REPO_URL" "$net/pacman.conf") && ! grep -q "^Server = file://" "$net/pacman.conf"'
+  check "the build-time database hook removed itself" '[[ ! -e $sfs/etc/pacman.d/hooks/zzzz98-graceos-net-keep-databases.hook ]]'
   for db in core extra graceos; do check "pinned $db database on the ISO" '[[ -s $net/sync/$db.db ]]'; done
   for p in grace-candyland cottoncandy toffeetwirl cherrycola cortex-council ollama; do
     check "downloads $p" 'grep -qx "$p" "$net/packages"'
