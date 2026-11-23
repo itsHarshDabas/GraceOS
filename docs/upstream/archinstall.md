@@ -46,6 +46,8 @@ test), against master `2c25540`. Checked:
 >
 > **Steps:** serve any profile file over HTTP, put its URL in `path`, run `archinstall --config <file>`
 > (or `--config-url`) and look at the selected profile.
+>
+> AI disclosure: I used Claude Code to trace the cause and reproduce it.
 
 ### PR text
 > **Title:** Register profiles imported from a URL
@@ -59,6 +61,22 @@ test), against master `2c25540`. Checked:
 >
 > Tests: `tests/test_profile_url.py` loads a profile from a mocked URL and checks it is registered and
 > selected. It fails before this change and passes after. `ruff check` and `ruff format --check` are clean.
+>
+> AI disclosure: Claude Code helped find the bug and write the fix and the test; I reviewed both.
+
+### How to send it (from your own machine, with `gh` signed in)
+archinstall's [AI_POLICY.md](https://github.com/archlinux/archinstall/blob/master/AI_POLICY.md) requires
+saying when AI helped, so both texts end with one disclosure line (not a co-author line).
+
+```sh
+gh repo fork archlinux/archinstall --clone && cd archinstall
+git checkout -b fix-profile-from-url
+git apply /path/to/archinstall-profile-from-url.patch
+git add -A && git commit -m "Register profiles imported from a URL"
+git push -u origin fix-profile-from-url
+gh issue create -R archlinux/archinstall --title "Profiles loaded from a URL (profile_config.profile.path) are dropped"   # paste the issue text
+gh pr create -R archlinux/archinstall --head <you>:fix-profile-from-url --title "Register profiles imported from a URL"   # paste the PR text, with the issue number
+```
 
 ## Step 2 (later): a built-in "Grace Candyland" profile
 Only once `grace-candyland` (and the packages it depends on) are in `[extra]`. Getting there:
