@@ -26,7 +26,7 @@ smoke() {
   case $1 in
     cherrycolallm) cherrycolallm --help >/dev/null ;;
     cottoncandy) python3 -c 'import PySide6.QtWebEngineWidgets, PySide6.QtSvg, PySide6.QtNetwork' ;;
-    cortex-council) node -e 'process.exit(+process.versions.node.split(".")[0] < 22)' && test -x /usr/bin/cortex-council ;;
+    cortex-council) node -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 22 ? 0 : 1)' && test -x /usr/bin/cortex-council ;;
     toffeetwirl) twirl --version --no-sandbox --user-data-dir /tmp/tt | head -1 ;;
     grace-candyland) command -v Hyprland quickshell >/dev/null && test -f /usr/share/grace-candyland/hyprland.conf ;;
     *) true ;;
@@ -36,10 +36,11 @@ smoke() {
 rc=0
 for p in $must $try; do
   kind=TRY; [[ " $must " == *" $p "* ]] && kind=MUST
+  rm -f /tmp/install.log /tmp/smoke.log
   if install_pkg "$p" && smoke "$p" >/tmp/smoke.log 2>&1; then
     echo "PASS  $p"
   else
-    echo "FAIL  $p ($kind)"; cat /tmp/install.log /tmp/smoke.log 2>/dev/null | grep -v "^debconf" | tail -6 | sed "s/^/      /"
+    echo "FAIL  $p ($kind)"; cat /tmp/install.log /tmp/smoke.log 2>/dev/null | grep -v "^debconf" | tail -12 | sed "s/^/      /"
     [[ $kind == MUST ]] && rc=1
   fi
 done

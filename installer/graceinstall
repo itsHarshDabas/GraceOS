@@ -5,14 +5,25 @@ It is archinstall's guided installer (the same menus: disk, user, password, loca
 with GraceOS defaults filled in: the GraceOS package repo and either the Full or the Minimal
 package set. archinstall's options still work, for example --config (merged over the GraceOS
 defaults), --creds and --silent. --full or --minimal skips the question.
+
+Dual boot (dualboot.py): it first scans the disks read-only. When Windows or another OS is there it
+offers to install alongside it in free space, warns about BitLocker, Fast Startup and the clock, and
+stops before archinstall erases anything that holds data unless the user types the device name
+(unattended: --allow-erase DEVICE, repeatable). --rtc-local keeps the hardware clock in local time
+like Windows. --no-gpu-detect skips adding GPU driver packages for the detected graphics.
 """
 
 import json
+import os
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
 SHARE = Path("/usr/share/graceinstall")
+# dualboot.py sits in SHARE on the ISO, next to this script in a checkout
+sys.path[:0] = [str(SHARE), str(Path(__file__).resolve().parent)]
+import dualboot  # noqa: E402
 
 # shortcut: unsigned (Optional TrustAll), packages come over HTTPS from GitHub Releases;
 # sign the repo with a key kept in a CI secret before a public release.
@@ -47,15 +58,22 @@ def package_sets(text: str) -> tuple[list[str], list[str]]:
     return full, minimal
 
 
-def defaults(edition: str) -> dict:
+def defaults(edition: str, gpus: list[tuple[str, str, str]] | None = None) -> dict:
     full, minimal = package_sets((SHARE / "packages").read_text())
+    packages, commands = (full if edition == "full" else minimal), [DEDUPE_PACMAN_CONF]
+    if edition == "full" and gpus:
+        gpu_packages, notes, gpu_commands = dualboot.gpu_choice(gpus)
+        packages = [*packages, *(p for p in gpu_packages if p not in packages)]
+        commands += gpu_commands
+        for note in notes:
+            print(f"Graphics: {note}")
     config = {
         "hostname": "graceos",
         "network_config": {"type": "nm"},
-        "packages": full if edition == "full" else minimal,
+        "packages": packages,
         "timezone": "UTC",
         "mirror_config": {"custom_repositories": [GRACEOS_REPO]},
-        "custom_commands": [DEDUPE_PACMAN_CONF],
+        "custom_commands": commands,
     }
     if edition == "full":
         config["app_config"] = {"audio_config": {"audio": "pipewire"}, "bluetooth_config": {"enabled": True}}
@@ -75,10 +93,37 @@ def ask_edition(args: list[str]) -> tuple[str, list[str]]:
     return ("minimal" if input("Choose 1 or 2 [1]: ").strip() == "2" else "full"), args
 
 
-def merged_config(args: list[str]) -> tuple[dict, list[str]]:
-    """GraceOS defaults, overridden by a user --config if given. Returns (config, remaining args)."""
+def take_flag(args: list[str], flag: str, with_value: bool = False) -> tuple[list[str], list[str]]:
+    """Remove graceinstall's own flags (archinstall rejects unknown ones). Returns (values, rest)."""
+    values, rest, i = [], [], 0
+    while i < len(args):
+        if args[i] == flag:
+            if with_value:
+                if i + 1 >= len(args):
+                    sys.exit(f"graceinstall: {flag} needs a value")
+                values.append(args[i + 1])
+                i += 1
+            else:
+                values.append(flag)
+        else:
+            rest.append(args[i])
+        i += 1
+    return values, rest
+
+
+def merged_config(args: list[str], scan: "dualboot.Scan | None" = None,
+                  gpus: list[tuple[str, str, str]] | None = None) -> tuple[dict, list[str]]:
+    """GraceOS defaults, then the dual-boot choices, then a user --config if given.
+    Returns (config, remaining args)."""
+    rtc_local, args = take_flag(args, "--rtc-local")
     edition, args = ask_edition(args)
-    config = defaults(edition)
+    config = defaults(edition, gpus)
+    if scan is not None and "--silent" not in args:
+        extra, commands = dualboot.choose(scan)
+        config.update(extra)
+        config["custom_commands"] += commands
+    if rtc_local and dualboot.RTC_LOCAL_COMMAND not in config["custom_commands"]:
+        config["custom_commands"].append(dualboot.RTC_LOCAL_COMMAND)
     if "--config" in args:
         i = args.index("--config")
         if i + 1 >= len(args):
@@ -90,18 +135,27 @@ def merged_config(args: list[str]) -> tuple[dict, list[str]]:
         repos = [r for r in mirrors.get("custom_repositories", []) if r.get("name") != "graceos"]
         commands = user.pop("custom_commands", [])
         config.update(user)
-        config["custom_commands"] = [DEDUPE_PACMAN_CONF, *commands]
+        config["custom_commands"] = [*config["custom_commands"], *commands]
         config["mirror_config"] = {**mirrors, "custom_repositories": [GRACEOS_REPO, *repos]}
     return config, args
 
 
 def main() -> int:
-    config, args = merged_config(sys.argv[1:])
+    allowed, args = take_flag(sys.argv[1:], "--allow-erase", with_value=True)
+    no_gpu, args = take_flag(args, "--no-gpu-detect")
+    interactive = "--silent" not in args
+    try:
+        scan = dualboot.scan()
+    except (OSError, ValueError, subprocess.CalledProcessError) as err:
+        sys.exit(f"graceinstall: couldn't scan the disks ({err}); stopping so nothing gets erased by mistake.")
+    gpus = [] if no_gpu else dualboot.pci_display_devices()
+    config, args = merged_config(args, scan, gpus)
     fd, path = tempfile.mkstemp(prefix="graceinstall-", suffix=".json")
     with open(fd, "w") as f:
         json.dump(config, f)
     sys.argv = ["archinstall", "--config", path, "--skip-version-check", *args]
 
+    dualboot.install_hooks(scan, {os.path.realpath(a) for a in allowed} | set(allowed), interactive)
     from archinstall.main import main as archinstall_main
 
     return archinstall_main()

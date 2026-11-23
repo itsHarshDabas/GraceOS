@@ -101,7 +101,6 @@ sdparm
 sequoia-sq
 sg3_utils
 smartmontools
-sof-firmware
 squashfs-tools
 sudo
 syslinux
@@ -143,6 +142,7 @@ pciutils
 python
 python-pip
 ripgrep
+sof-firmware
 uv
 wget
 yay-bin

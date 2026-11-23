@@ -1,4 +1,4 @@
-# 0011: GraceOS's apps as signed apt and dnf repos on GitHub Releases
+# 0012: GraceOS's apps as signed apt and dnf repos on GitHub Releases
 
 - Status: proposed, 2026-11-23 (PR `distro/apt-dnf-repos`). Harsh chose "own signed apt + dnf repos" over a PPA and COPR.
 

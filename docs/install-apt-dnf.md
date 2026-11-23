@@ -29,16 +29,17 @@ The `distro-packages` workflow installs each package in a clean container and ru
 `twirl --version`, and Hyprland, Quickshell and the shell files for Grace Candyland). Its log is the
 current answer; the table is what we expect:
 
-| Package | Debian 13 | Debian testing/sid | Ubuntu 24.04 | Ubuntu devel | Fedora |
+| Package | Debian 13 | Debian testing/sid | Ubuntu 24.04 | Ubuntu devel (Stonking Stingray) | Fedora 45 |
 |---|---|---|---|---|---|
-| `cherrycolallm` | yes | yes | yes (tested) | yes | yes |
-| `toffeetwirl` | yes | yes | yes (tested) | yes | yes |
-| `cottoncandy` | maybe | yes | no: no PySide6 Qt WebEngine | maybe | yes |
-| `cortex-council` | maybe (needs Node 22) | maybe | no: Node 18 | maybe | yes |
-| `grace-candyland` | no: no Quickshell | maybe | no: no Quickshell or Hyprland | maybe | maybe |
-| `grace-candyland-desktop` | no | maybe | no | maybe | maybe |
+| `cherrycolallm` | yes | yes | yes | yes | yes |
+| `toffeetwirl` | yes | yes | yes | yes | yes |
+| `cottoncandy` | yes | yes | no: no PySide6 Qt WebEngine | yes | yes |
+| `cortex-council` | no: no Node 22 | yes (Node 24) | no: Node 18 | yes (Node 24) | yes (Node 22) |
+| `grace-candyland` | no: no Hyprland or Quickshell | yes | no: no Hyprland or Quickshell | yes | not yet (see CI) |
+| `grace-candyland-desktop` | no | yes | no | yes | not yet |
 
-"maybe" turns into yes or no with the first CI run on these images.
+From the `distro-packages` CI run on PR #25 (2026-11-23): "yes" means it installed from the repo and passed its smoke check.
+
 
 Things that stay Arch-only: Ollama isn't in these archives (install it from https://ollama.com for
 Ask Grace and CherryColaLLM), and Grace Settings' Updates & Software page reads pacman and yay.

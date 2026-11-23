@@ -48,10 +48,10 @@ jobs:
       matrix:
         include:
           # MUST packages fail the job when they don't install and run; TRY ones are only reported.
-          - { image: 'debian:sid',      must: 'cherrycolallm toffeetwirl cottoncandy', try: 'cortex-council grace-candyland grace-candyland-desktop' }
-          - { image: 'debian:trixie',   must: 'cherrycolallm toffeetwirl', try: 'cottoncandy cortex-council grace-candyland grace-candyland-desktop' }
+          - { image: 'debian:sid',      must: 'cherrycolallm toffeetwirl cottoncandy cortex-council grace-candyland grace-candyland-desktop', try: '' }
+          - { image: 'debian:trixie',   must: 'cherrycolallm toffeetwirl cottoncandy', try: 'cortex-council grace-candyland grace-candyland-desktop' }
           - { image: 'ubuntu:24.04',    must: 'cherrycolallm toffeetwirl', try: 'cottoncandy cortex-council grace-candyland grace-candyland-desktop' }
-          - { image: 'ubuntu:devel',    must: 'cherrycolallm toffeetwirl', try: 'cottoncandy cortex-council grace-candyland grace-candyland-desktop' }
+          - { image: 'ubuntu:devel',    must: 'cherrycolallm toffeetwirl cottoncandy cortex-council grace-candyland grace-candyland-desktop', try: '' }
           - { image: 'fedora:latest',   must: 'cherrycolallm toffeetwirl cottoncandy cortex-council', try: 'grace-candyland grace-candyland-desktop' }
     steps:
       - uses: actions/checkout@v4
