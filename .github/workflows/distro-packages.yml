@@ -1,0 +1,89 @@
+name: distro-packages
+# Builds GraceOS's apps as .deb and .rpm, install-tests them in Debian, Ubuntu and Fedora, and on
+# main publishes signed apt and dnf repos as the apt-repo, rpm-repo and repodata releases.
+# Publishing needs the GRACEOS_SIGNING_KEY secret (an armored GPG private key without a passphrase);
+# without it, main runs only build and test.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['iso/*.ref', 'packages/toffeetwirl/**', 'packages/grace-candyland-desktop/**', 'build/*distro*', '.github/workflows/distro-packages.yml']
+  pull_request:
+    paths: ['iso/*.ref', 'packages/toffeetwirl/**', 'packages/grace-candyland-desktop/**', 'build/*distro*', '.github/workflows/distro-packages.yml']
+permissions:
+  contents: read
+concurrency: { group: 'distro-packages-${{ github.ref }}', cancel-in-progress: false }
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    outputs:
+      signed: ${{ steps.key.outputs.signed }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq apt-utils createrepo-c rpm
+      - run: build/build-distro-packages.sh
+      - name: Signing key (the real one on main, a throwaway one otherwise)
+        id: key
+        env: { KEY: '${{ github.event_name != ''pull_request'' && secrets.GRACEOS_SIGNING_KEY || '''' }}' }
+        run: |
+          if [[ -n $KEY ]]; then
+            printf '%s\n' "$KEY" | gpg --batch --quiet --import
+            echo signed=true >>"$GITHUB_OUTPUT"
+          else
+            gpg --batch --quiet --passphrase '' --quick-gen-key "GraceOS CI test key" ed25519 sign 1d
+            echo signed=false >>"$GITHUB_OUTPUT"
+          fi
+          echo "GPG_KEY=$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr/{print $10; exit}')" >>"$GITHUB_ENV"
+      - run: build/make-distro-repos.sh
+      - uses: actions/upload-artifact@v4
+        with: { name: repos, path: out/repos, retention-days: 7 }
+
+  test:
+    needs: build
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # MUST packages fail the job when they don't install and run; TRY ones are only reported.
+          - { image: 'debian:sid',      must: 'cherrycolallm toffeetwirl cottoncandy cortex-council grace-candyland grace-candyland-desktop', try: '' }
+          - { image: 'debian:trixie',   must: 'cherrycolallm toffeetwirl cottoncandy', try: 'cortex-council grace-candyland grace-candyland-desktop' }
+          - { image: 'ubuntu:24.04',    must: 'cherrycolallm toffeetwirl', try: 'cottoncandy cortex-council grace-candyland grace-candyland-desktop' }
+          - { image: 'ubuntu:devel',    must: 'cherrycolallm toffeetwirl cottoncandy cortex-council grace-candyland grace-candyland-desktop', try: '' }
+          - { image: 'fedora:latest',   must: 'cherrycolallm toffeetwirl cottoncandy cortex-council', try: 'grace-candyland grace-candyland-desktop' }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: repos, path: out/repos }
+      - run: |
+          python3 -m http.server 8080 --bind 127.0.0.1 -d out/repos >/dev/null 2>&1 &
+          sleep 1
+          docker run --rm --network host -v "$PWD/build:/b:ro" '${{ matrix.image }}' \
+            bash /b/test-distro-repos.sh http://127.0.0.1:8080 '${{ matrix.must }}' '${{ matrix.try }}'
+
+  publish:
+    needs: [build, test]
+    if: github.event_name != 'pull_request' && needs.build.outputs.signed == 'true'
+    runs-on: ubuntu-24.04
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: repos, path: out/repos }
+      - env: { GH_TOKEN: '${{ github.token }}' }
+        run: |
+          # Packages first, metadata last, then drop what the new metadata no longer lists.
+          for tag in apt-repo rpm-repo repodata; do
+            gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --latest=false \
+              --title "GraceOS $tag" --notes "Part of GraceOS's apt and dnf repos; see docs/install-apt-dnf.md."
+          done
+          gh release upload apt-repo out/repos/apt-repo/* --clobber
+          gh release upload rpm-repo out/repos/rpm-repo/* --clobber
+          gh release upload repodata out/repos/repodata/* --clobber
+          for tag in apt-repo rpm-repo repodata; do
+            gh release view "$tag" --json assets -q '.assets[].name' | while read -r a; do
+              [ -e "out/repos/$tag/$a" ] || gh release delete-asset "$tag" "$a" -y
+            done
+          done
