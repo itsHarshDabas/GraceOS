@@ -31,6 +31,7 @@ Each brief is meant to be pasted directly to a coding agent (Claude Code, OpenCo
 | T-024 | Cortex Council: the AI parliament (models debate, plan, and run nothing until you approve) as a local web app, opened from Candyland in the browser | [Cortex-Council](https://github.com/itsHarshDabas/Cortex-Council) repo, `packages/cortex-council`, `grace-candyland` (`grace-cortex`) | Harsh (Claude) | review (packaged as `cortex-council`, on the ISO in Full installs; not yet opened on a booted ISO) | T-016 |
 | T-025 | GraceOS Net: a smaller online image that connects at first boot (Ethernet or Wi-Fi), downloads the desktop and apps pinned to its build, then starts the desktop | `iso/net/`, `build/`, `.github/`, ADR 0009 | Harsh (Claude) | review (setup tested with fake network tools, 18 checks; build, verify and boot tests run in CI on the PR; first boot with real downloads not yet tried) | — |
 | T-026 | Grace Candyland on any Arch system: `grace-candyland-desktop`, AUR publishing, an archinstall profile for Arch's own ISO | `packages/grace-candyland-desktop/`, `build/aur.sh`, `.github/workflows/aur.yml`, `installer/archinstall/`, ADR 0010 | Harsh (Claude) | review (rendering, .SRCINFO and profile loading tested; AUR push and a full archinstall run not yet tried) | — |
+| T-027 | GraceOS apps on apt and dnf: .deb/.rpm builds, signed repos on GitHub Releases, install tests | `build/*distro*`, `.github/workflows/distro-packages.yml`, ADR 0011 | Harsh (Claude) | review (built and signed locally; Ubuntu 24.04 install test passed for cherrycolallm and toffeetwirl; other images run in CI) | T-026 |
 
 ---
 
@@ -115,3 +116,6 @@ Cortex Council's own cross-platform gateway (`cortex-council`) starts its local 
 
 ### T-026 — Grace Candyland on any Arch system
 `grace-candyland-desktop` in `[graceos]` installs the whole desktop (not the GraceOS name). `build/aur.sh` and the `aur` workflow publish `packages/*` to the AUR once `AUR_SSH_PRIVATE_KEY` is set. `installer/archinstall/` lets Arch's own ISO install it with `archinstall --config-url` (ADR 0010, `docs/install-anywhere.md`). Acceptance: on a VM booted from the official Arch ISO, the two commands in `installer/archinstall/README.md` install a system whose SDDM offers Grace Candyland, and the desktop, Ask Grace and the apps open; `yay -S grace-candyland-desktop` works on a plain Arch install after the first AUR push.
+
+### T-027 — apt and dnf
+`build/build-distro-packages.sh` builds the apps as .deb and .rpm from the pinned sources; `build/make-distro-repos.sh` makes signed apt and dnf repos laid out as the `apt-repo`, `rpm-repo` and `repodata` releases; the `distro-packages` workflow install-tests them in Debian, Ubuntu and Fedora and publishes on main once `GRACEOS_SIGNING_KEY` is set (ADR 0011, `docs/install-apt-dnf.md`). Acceptance: on fresh Debian, Ubuntu and Fedora systems, the documented commands install the packages the table says they support, and those apps open.

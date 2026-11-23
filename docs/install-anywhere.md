@@ -85,19 +85,5 @@ If someone already owns one of the names, that push fails and the log says so; p
 `build/aur.sh` (`AUR_NAME`).
 
 ## Other distros (apt, dnf)
-Debian's, Ubuntu's and Fedora's official archives each need a sponsor or packager inside that
-project, so the practical routes are our own signed apt and dnf repos (on GitHub Pages, say), a
-Launchpad PPA for Ubuntu, or a Fedora COPR. Where each piece stands:
-
-| | Debian / Ubuntu (apt) | Fedora (dnf) |
-|---|---|---|
-| CherryColaLLM | ready: its repo already builds a `.deb` | ready: its repo already builds an `.rpm` |
-| ToffeeTwirl | doable: VSCodium's scripts make `.deb`/`.rpm`; the fork's workflow builds only the tarball today | doable, same |
-| CottonCandy | doable: Debian packages PySide6 with Qt WebEngine (`python3-pyside6.qtwebenginewidgets`) | doable (PySide6 is packaged) |
-| Cortex Council | needs Node 22 or newer: check each release's `nodejs`, or bundle Node | doable |
-| Grace Candyland desktop | **only on new releases:** Quickshell is in Debian testing/unstable (`quickshell` 0.2.1) and Ubuntu's development release, not in Debian 13 or the current Ubuntu LTS; it also needs a current Hyprland | doable: Fedora packages Quickshell and Hyprland |
-| Updates & Software page | Arch-only (pacman, yay) | Arch-only |
-
-Checked 2026-11-23 on packages.debian.org, packages.ubuntu.com and packages.fedoraproject.org.
-
-Nothing here is built yet; it's the next piece of work.
+The apps are also published as signed apt and dnf repos: see [install-apt-dnf.md](install-apt-dnf.md),
+which also says which packages each Debian, Ubuntu and Fedora release can install.
