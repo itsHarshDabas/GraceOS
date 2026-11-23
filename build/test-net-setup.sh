@@ -17,7 +17,6 @@ make_world() {
   w=$root/$1; rm -rf "$w"; mkdir -p "$w"/{bin,net/sync,sync,cache,fake}
   export FAKE=$w/fake
   cat > "$w/net/net.conf" <<'EOF'
-ARCH_ARCHIVE=https://archive.archlinux.org/repos/2026/11/22
 GRACEOS_REPO_URL=https://github.com/example/GraceOS/releases/download/net-repo-abc1234
 LATEST_URL=https://github.com/example/GraceOS/releases/latest
 BUILT_FROM=abc1234,\ 2026-11-23
@@ -120,7 +119,7 @@ expect "quit: exits 1 without installing" '[[ $(cat $w/rc) == 1 && ! -e $w/done/
 make_world eof; run ""
 expect "no input: stops instead of looping" '[[ $(cat $w/rc) == 1 && ! -e $FAKE/installs ]]'
 
-# 8. GitHub down but the archive up is still "offline"; nothing is installed until it answers.
+# 8. GitHub not answering counts as offline; nothing is installed until it answers.
 make_world github-down; run "3\n4\n"
 expect "partly offline: keeps asking, installs nothing" '[[ $(cat $w/rc) == 1 && ! -e $FAKE/installs ]]'
 

@@ -15,8 +15,8 @@ What Harsh asked for:
 ## Options
 - **A. Download from Arch's mirrors and the rolling `repo-x86_64` release.** Simplest. Rejected: the live base is frozen on the ISO, so installing today's desktop onto last month's base is an Arch partial upgrade, which can break on a library bump. It also isn't reproducible.
 - **B. Pin everything to the build.** Chosen.
-  - The Net ISO is built from one day of the [Arch Linux Archive](https://wiki.archlinux.org/title/Arch_Linux_Archive) (`archive.archlinux.org/repos/YYYY/MM/DD`).
-  - The ISO carries that day's `core` and `extra` databases and the build's `graceos.db`, so the base and the downloads always match.
+  - The ISO carries the `core` and `extra` databases it was built from and the build's `graceos.db`, so the base and the downloads always match.
+  - Packages that the mirrors have since replaced come from the [Arch Linux Archive](https://wiki.archlinux.org/title/Arch_Linux_Archive) (`archive.archlinux.org/repos/YYYY/MM/DD`).
   - The GraceOS packages are published with the ISO.
 - **C. A netinstall that boots straight into `graceinstall`, with no live desktop.** Rejected. Harsh wants it to boot into the desktop, and `graceinstall` already covers installing.
 
@@ -26,11 +26,12 @@ What Harsh asked for:
   - It renames the image `graceos-net-<date>-x86_64.iso` (label `GRACEOS_NET_*`, boot entries "GraceOS Net live medium").
   - The Full build is unchanged.
 - **Pinning.**
-  - The archive day is yesterday (UTC), or the most recent day that exists, or `ARCH_SNAPSHOT=YYYY/MM/DD`.
-  - In the build's `pacman.conf`, each Arch repo lists the normal mirrors first, then the archive day.
-    - The shipped databases fix the version of every package, and pacman checks each file's sha256 against them, so a mirror can only serve the exact pinned file.
-    - Mirrors have most of those files (only packages updated since that day are gone) and are much faster. `archive.archlinux.org` is one server and stalled in the first CI run, so it serves only the rest.
-  - `/usr/share/graceos-net/pacman.conf` is that same file with `[graceos]` pointing at `NET_REPO_URL`. In CI that is the `net-repo-<sha7>` release, which `publish-iso.sh` creates from the packages built in the same run.
+  - The Net ISO is built from the normal mirrors, like the Full one. A build-time pacman hook, `zzzz98-graceos-net-keep-databases.hook`, copies the `core` and `extra` databases that pacstrap synced into `/usr/share/graceos-net/sync/`. Like releng's other build hooks, it is marked "remove from airootfs" and deletes itself.
+    - The first design built from an archive day instead. It failed twice in CI: `archive.archlinux.org` stalled on the kernel and firmware, and then a local `file://` server for its databases made pacman skip every `file://` server, including the local GraceOS repo ("no servers configured for repository").
+  - At first boot each Arch repo lists the mirrors first, then the archive snapshots of the build day and the day after. A package that was current at build time is in one of those snapshots.
+    - The shipped databases fix the version of every package, and pacman checks each file's sha256 against them, so any server can only serve the exact pinned file.
+    - The mirrors are fast and have most of the files. The archive is one server, so `DisableDownloadTimeout` keeps a slow download going instead of aborting it.
+  - `/usr/share/graceos-net/pacman.conf` is the build's file with those archive servers added and `[graceos]` pointing at `NET_REPO_URL`. In CI that is the `net-repo-<sha7>` release, which `publish-iso.sh` creates from the packages built in the same run.
   - `/usr/share/graceos-net/sync/` holds `core.db`, `extra.db` and `graceos.db`.
 - **Verification.**
   - `grace-net-setup` copies the shipped databases into pacman's sync directory and installs without `-y`, so pacman never fetches newer databases.
@@ -55,5 +56,5 @@ What Harsh asked for:
   - The size is not measured yet; the first CI build reports it.
   - The setup's "at least 6 GB" advice is an estimate until it's measured on a booted ISO.
 - A Net ISO stops being able to finish setup once its `net-repo-*` release is pruned, after five newer builds. Setup then says so and links the latest ISO. `graceinstall` still works from it, because it installs from current mirrors like the Full ISO.
-- Packages updated since the archive day come from `archive.archlinux.org`, a single server that can be slow. pacman moves on to the next server for a file that fails, and `grace-net-setup` retries the whole install.
+- Packages updated since the build come from `archive.archlinux.org`, a single server that can be slow. pacman moves on to the next server for a file that fails, and `grace-net-setup` retries the whole install.
 - `graceinstall` is unchanged. An installed system uses the normal mirrors and the rolling `[graceos]` repo, not the pinned snapshot.
