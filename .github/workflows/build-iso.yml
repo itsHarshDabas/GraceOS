@@ -6,13 +6,19 @@ on:
     paths: ['iso/**', 'build/**', 'packages/**', '.github/workflows/build-iso.yml']
   pull_request:
     paths: ['iso/**', 'build/**', 'packages/**', '.github/workflows/build-iso.yml']
-# Main and manual runs publish the ISO as a release; one at a time, so an older build never replaces a newer one.
+# Main and manual runs publish the ISOs as a release; one at a time, so an older build never replaces a newer one.
 concurrency: { group: 'build-iso-${{ github.ref }}', cancel-in-progress: false }
 jobs:
+  # Two images from one profile: full (everything on the ISO) and net (GraceOS Net, which downloads the desktop
+  # and apps at first boot; docs/decisions/0009-graceos-net.md). Each is built, verified and boot-tested on its own.
   iso:
+    name: iso (${{ matrix.edition }})
+    strategy:
+      fail-fast: false
+      matrix: { edition: [full, net] }
     runs-on: ubuntu-latest
     timeout-minutes: 120
-    permissions: { contents: write }  # only the publish step uses it
+    permissions: { contents: read }
     container:
       image: archlinux:latest
       options: --privileged
@@ -20,21 +26,44 @@ jobs:
       - run: pacman -Syu --noconfirm archiso git qemu-base edk2-ovmf base-devel make python github-cli nodejs npm
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }  # package versions count commits
+      - if: matrix.edition == 'net'
+        run: build/test-net-setup.sh
       # Build GraceOS's own packages here too, so the ISO never waits on the published repo.
       - run: useradd -m builder && chown -R builder . && su builder -c 'git config --global --add safe.directory "*" && build/build-packages.sh'
       - run: build/check-packages.sh
-      - run: build/build-iso.sh
+      # Net downloads this build's GraceOS packages from the net-repo-<sha7> release that publish-iso.sh creates.
+      - env: { REPO: '${{ github.repository }}', SHA: '${{ github.sha }}' }
+        shell: bash
+        run: |
+          [[ ${{ matrix.edition }} == net ]] && export NET_REPO_URL="https://github.com/$REPO/releases/download/net-repo-${SHA:0:7}"
+          build/build-iso.sh ${{ matrix.edition }}
       - run: build/verify-iso.sh out/graceos-*.iso
       # boot-test.sh uses KVM when the runner exposes /dev/kvm and falls back to (slow) TCG otherwise.
       - run: build/boot-test.sh out/graceos-*.iso bios 900
       - run: build/boot-test.sh out/graceos-*.iso uefi 900
-      # The tested ISO becomes the "Latest" release (in parts when it's over GitHub's 2 GiB file limit).
-      - if: github.event_name != 'pull_request'
-        env: { GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}', SHA: '${{ github.sha }}' }
-        run: build/publish-iso.sh
       - uses: actions/upload-artifact@v4
-        with: { name: graceos-iso-sha256, path: out/*.sha256 }
-      # Manual runs also keep the ISO as a workflow artifact for a week.
-      - if: github.event_name == 'workflow_dispatch'
+        with: { name: 'sha256-${{ matrix.edition }}', path: out/*.sha256 }
+      # The publish job needs the tested ISOs; manual runs also keep them as workflow artifacts for a week.
+      - if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
-        with: { name: graceos-iso, path: out/*.iso, retention-days: 7 }
+        with:
+          name: 'iso-${{ matrix.edition }}'
+          path: |
+            out/*.iso
+            out/*.sha256
+            out/net-repo/
+          compression-level: 0  # ISOs and packages are compressed already
+          retention-days: ${{ github.event_name == 'workflow_dispatch' && 7 || 1 }}
+  # Both tested ISOs become one "Latest" release (in parts if one is over GitHub's 2 GiB file limit).
+  publish:
+    needs: iso
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { pattern: 'iso-*', path: out, merge-multiple: true }
+      - env: { GH_TOKEN: '${{ github.token }}', REPO: '${{ github.repository }}', SHA: '${{ github.sha }}' }
+        run: ls -lR out && build/publish-iso.sh

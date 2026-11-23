@@ -1,0 +1,180 @@
+#!/usr/bin/env bash
+# grace-net-setup: GraceOS Net's first-boot step. The Net ISO carries only the base system; this
+# connects to the internet (Ethernet by itself, Wi-Fi from a menu), downloads the Grace Candyland
+# desktop and the GraceOS apps (CottonCandy, CandySole, ToffeeTwirl, CherryCola, Ask Grace,
+# Grace Settings, Cortex Council) and installs them into the live session. The desktop starts after it.
+#
+# What it downloads is pinned when the ISO is built (see docs/decisions/0009-graceos-net.md):
+#   - Arch packages at the versions of the Arch Linux Archive day the ISO was built from (from the
+#     mirrors when they still have that version, else from the archive);
+#   - GraceOS packages from the release the build published next to the ISO;
+#   - the package databases (with every package's sha256) ship inside the ISO, so pacman checks
+#     each download against them and checks Arch's signatures as usual.
+#
+# usage: grace-net-setup [--yes]     (--yes: don't ask before a low-space install)
+set -uo pipefail
+
+NET=${GRACE_NET_DIR:-/usr/share/graceos-net}
+DONE=${GRACE_NET_DONE:-/var/lib/graceos-net/installed}
+SYNC=${GRACE_NET_SYNC:-/var/lib/pacman/sync}
+CACHE=${GRACE_NET_CACHE:-/var/cache/pacman/pkg}
+ATTEMPTS=${GRACE_NET_ATTEMPTS:-5}
+WAIT=${GRACE_NET_WAIT:-30}        # seconds to wait for Ethernet before asking
+BACKOFF=${GRACE_NET_BACKOFF:-5}   # first pause between download attempts, doubled each time
+ASSUME_YES=0
+[[ ${1:-} == --yes ]] && ASSUME_YES=1
+
+say() { printf '%s\n' "$*"; }
+# Prints the answer; fails when there is no one to answer (end of input), so menus can't spin.
+ask() { local reply; read -r -p "$1" reply || return 1; printf '%s' "$reply"; }
+
+if [[ -e $DONE ]]; then
+  say "GraceOS Net is already set up."
+  exit 0
+fi
+if (( EUID != 0 )); then exec sudo "$0" "$@"; fi
+
+# net.conf is written by build/build-iso.sh: ARCH_ARCHIVE, GRACEOS_REPO_URL, LATEST_URL, BUILT_FROM.
+# shellcheck source=/dev/null
+source "$NET/net.conf"
+conf=$NET/pacman.conf
+mapfile -t packages < <(grep -v '^\s*#' "$NET/packages" | grep .)
+
+# HTTP status of a HEAD request ("000" when there is no answer at all).
+status() { curl -sS -o /dev/null -I -L --max-time 15 -w '%{http_code}' "$1" 2>/dev/null || true; }
+# Online = GitHub answers at all (a 404 there is a missing release, which check_published explains,
+# not a missing connection). Arch packages come from the mirrors, or the archive day when a mirror
+# no longer has that version.
+online() {
+  [[ $(status "$GRACEOS_REPO_URL/graceos.db") != 000 ]]
+}
+
+connect_wifi() {
+  rfkill unblock wifi 2>/dev/null || true
+  if ! nmcli -t -f TYPE device 2>/dev/null | grep -qx wifi; then
+    say "No Wi-Fi adapter found. Plug in an Ethernet cable, or try option 2 for other connections."
+    return 1
+  fi
+  say "Looking for Wi-Fi networks..."
+  local line signal rest security ssid
+  local -a ssids=() labels=()
+  local -A seen=()
+  # SSID last, so a colon inside a network name can't shift the other fields.
+  while IFS= read -r line; do
+    signal=${line%%:*}; rest=${line#*:}; security=${rest%%:*}; ssid=${rest#*:}
+    [[ -z $ssid ]] && continue              # hidden networks: use nmtui
+    [[ -n ${seen[$ssid]-} ]] && continue    # one row per name; the strongest comes first
+    seen[$ssid]=1
+    ssids+=("$ssid"); labels+=("$(printf '%-32s %3s%%  %s' "$ssid" "$signal" "${security:-open}")")
+  done < <(nmcli -t -e no -f SIGNAL,SECURITY,SSID device wifi list --rescan yes 2>/dev/null | sort -t: -k1,1nr)
+  if (( ${#ssids[@]} == 0 )); then
+    say "No Wi-Fi networks found. Move closer to the router, or use option 2 for a hidden network."
+    return 1
+  fi
+  local i
+  for i in "${!ssids[@]}"; do printf '  %2d) %s\n' $((i + 1)) "${labels[i]}"; done
+  local pick; pick=$(ask "Network number (Enter to go back): ") || return 1
+  [[ $pick =~ ^[0-9]+$ ]] && (( pick >= 1 && pick <= ${#ssids[@]} )) || return 1
+  ssid=${ssids[pick - 1]}
+  # --ask lets nmcli prompt for the password itself (hidden input, never on a command line).
+  nmcli --ask device wifi connect "$ssid" || { say "Couldn't connect to $ssid."; return 1; }
+}
+
+ensure_network() {
+  say "Checking the internet connection..."
+  local t=0
+  while (( t < WAIT )); do
+    online && { say "Connected."; return 0; }
+    sleep 3; t=$((t + 3))
+  done
+  while ! online; do
+    say ""
+    say "GraceOS Net needs the internet to download its desktop and apps."
+    say "  1) Connect to Wi-Fi"
+    say "  2) Other connections (nmtui): hidden Wi-Fi, mobile broadband, VPN, static IP"
+    say "  3) Try again (plug in an Ethernet cable first)"
+    say "  4) Stop setup and go to a shell (type grace-net-setup to come back)"
+    local choice; choice=$(ask "Choose 1-4 [1]: ") || return 1
+    case $choice in
+      ""|1) connect_wifi || continue ;;
+      2) nmtui || true ;;
+      3) ;;
+      4) return 1 ;;
+      *) continue ;;
+    esac
+    say "Checking..."
+    for _ in 1 2 3 4 5; do online && break; sleep 2; done
+  done
+  say "Connected."
+}
+
+# A download that is missing (not merely slow) means this Net build's packages were taken down.
+check_published() {
+  local code
+  code=$(status "$GRACEOS_REPO_URL/graceos.db")
+  if [[ $code == 404 || $code == 410 ]]; then
+    say "This GraceOS Net build ($BUILT_FROM) is too old: its GraceOS packages are no longer published."
+    say "Download the newest GraceOS Net ISO from $LATEST_URL"
+    return 1
+  fi
+}
+
+# Bytes from pacman's "Installed Size" (e.g. "12.34 MiB").
+to_bytes() {
+  awk -v n="$1" -v u="$2" 'BEGIN { m["B"]=1; m["KiB"]=1024; m["MiB"]=1048576; m["GiB"]=1073741824
+                                   printf "%d", n * m[u] }'
+}
+
+check_space() {
+  local -a todo
+  mapfile -t todo < <(pacman --config "$conf" -Sp --needed --print-format '%n' "${packages[@]}" 2>/dev/null)
+  (( ${#todo[@]} )) || return 0
+  local down=0 inst=0 s line
+  while read -r s; do down=$((down + s)); done < <(pacman --config "$conf" -Sp --needed --print-format '%s' "${packages[@]}")
+  while read -r line; do
+    set -- $line   # "Installed Size : 12.34 MiB"
+    inst=$((inst + $(to_bytes "${4:-0}" "${5:-B}")))
+  done < <(LC_ALL=C pacman --config "$conf" -Si "${todo[@]}" | grep '^Installed Size')
+  local avail; avail=$(df -B1 --output=avail / | tail -1 | tr -d ' ')
+  say "${#todo[@]} packages: $((down / 1048576)) MiB to download, $((inst / 1048576)) MiB once installed."
+  if (( avail < down + inst )); then
+    say "The live session has $((avail / 1048576)) MiB free in memory, which may not be enough."
+    say "GraceOS Net keeps the desktop in RAM: give this PC or VM at least 6 GB, or use the Full ISO."
+    (( ASSUME_YES )) && return 0
+    local yes; yes=$(ask "Try anyway? [y/N]: ") || return 1
+    [[ $yes == [yY]* ]] || return 1
+  fi
+}
+
+install_packages() {
+  local attempt=1 pause=$BACKOFF
+  while :; do
+    say ""
+    say "Downloading and installing (attempt $attempt of $ATTEMPTS)..."
+    # No -y: the databases are the pinned ones shipped on the ISO. pacman resumes partial downloads.
+    if pacman --config "$conf" -S --needed --noconfirm "${packages[@]}"; then return 0; fi
+    (( attempt >= ATTEMPTS )) && break
+    check_published || return 1
+    say "The download failed. Trying again in ${pause}s..."
+    sleep "$pause"
+    online || ensure_network || return 1
+    attempt=$((attempt + 1)); pause=$((pause * 2))
+  done
+  say "Installing failed $ATTEMPTS times. Check the connection and type grace-net-setup to try again."
+  return 1
+}
+
+say "GraceOS Net setup: getting the desktop and apps from the internet."
+ensure_network || exit 1
+check_published || exit 1
+# pacman checks Arch signatures with the keyring the live system sets up at boot.
+systemctl start pacman-init.service 2>/dev/null || true
+install -d "$SYNC"
+install -m644 "$NET"/sync/*.db "$SYNC"/
+check_space || exit 1
+install_packages || exit 1
+rm -f "$CACHE"/*.pkg.tar.* 2>/dev/null || true   # the downloads live in RAM too
+systemctl start bluetooth.service 2>/dev/null || true
+install -Dm644 /dev/null "$DONE"
+say ""
+say "GraceOS Net is ready. Starting the desktop..."

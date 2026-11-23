@@ -15,9 +15,11 @@ These are preinstalled on the live ISO and in a Full install.
 | Chromium through Qt WebEngine, with Ask Grace in the address bar ([repo](https://github.com/itsHarshDabas/CottonCandy-Browser)). Run `cottoncandy`. | The GTK4 and VTE terminal from [Grace Candyland](https://github.com/itsHarshDabas/grace-candyland), with tabs and the Grace palette. Run `candysole`. | VS Code built with VSCodium's scripts, Grace Dark theme and Grace built in ([repo](https://github.com/itsHarshDabas/ToffeeTwirl-IDE)). Run `twirl`. |
 
 ## Download
-The [Latest release](https://github.com/itsHarshDabas/GraceOS/releases/latest) has the newest ISO that passed the build's checks and its BIOS and UEFI boot tests. Every push to `main` that changes the ISO replaces it.
-- The ISO is one file of about 1.9 GB. Download `graceos-<date>-x86_64.iso` and its `.sha256` into one folder, then run `sha256sum -c graceos-*.iso.sha256`.
-- If a future ISO grows past GitHub's 2 GiB file limit, the release comes in parts (`.part00`, `.part01`, …) instead, and its notes show the `cat` command that joins them.
+The [Latest release](https://github.com/itsHarshDabas/GraceOS/releases/latest) has the newest ISOs that passed the build's checks and their BIOS and UEFI boot tests. Every push to `main` that changes the ISO replaces it. There are two images:
+- **GraceOS** (`graceos-<date>-x86_64.iso`, about 1.9 GB) has everything on the ISO, so the live desktop works offline.
+- **GraceOS Net** (`graceos-net-<date>-x86_64.iso`) is smaller and needs the internet. At first boot it connects (Ethernet by itself, Wi-Fi from a menu), downloads the desktop and the GraceOS apps, and then starts the desktop. The live session keeps the downloads in RAM, so give it more memory than the Full ISO; setup checks and tells you if it's short. The downloads are pinned to that build and checked against the package databases on the ISO ([ADR 0009](docs/decisions/0009-graceos-net.md)). If setup stops, type `grace-net-setup` to carry on.
+
+Download an ISO and its `.sha256` into one folder, then run `sha256sum -c <name>.iso.sha256`. If an ISO grows past GitHub's 2 GiB file limit, it comes in parts (`.part00`, `.part01`, …) instead, and the release notes show the `cat` command that joins them.
 
 ## Start here
 - [AGENTS.md](AGENTS.md): rules for humans and coding agents (Claude Code, OpenCode, Cline).
@@ -33,11 +35,15 @@ sudo pacman -S archiso
 build/build-packages.sh        # optional: GraceOS's own packages into out/repo (else the published repo is used)
 sudo build/check-packages.sh   # verify every package in the manifest exists
 sudo build/build-iso.sh        # -> out/graceos-<date>-x86_64.iso (+ .sha256)
-sudo build/verify-iso.sh out/graceos-*.iso          # checksum, branding, symlinks, required tools
-build/boot-test.sh out/graceos-*.iso bios           # boots in QEMU and waits for sshd (needs qemu-base)
-build/boot-test.sh out/graceos-*.iso uefi           # also needs edk2-ovmf
+sudo build/build-iso.sh net    # -> out/graceos-net-<date>-x86_64.iso, GraceOS Net
+sudo build/verify-iso.sh out/graceos-2*.iso         # checksum, branding, symlinks, required tools (graceos-net-*.iso: Net's checks)
+build/boot-test.sh out/graceos-2*.iso bios          # boots in QEMU and waits for sshd (needs qemu-base)
+build/boot-test.sh out/graceos-2*.iso uefi          # also needs edk2-ovmf
+sudo build/test-net-setup.sh   # GraceOS Net's first-boot setup against fake network tools (any Linux)
 ```
-The `build-iso` GitHub Actions workflow runs the same steps in an Arch container on every push to `main` and every PR that touches `iso/`, `build/`, `packages/` or the workflow. Runs on `main`, and manual runs, then publish the tested ISO as the Latest release (`build/publish-iso.sh`); manual runs also keep it as a workflow artifact for a week.
+A local `build-iso.sh net` without `NET_REPO_URL` downloads GraceOS packages from the rolling package repo, so it only works until that repo moves on; CI builds pin them (see ADR 0009).
+
+The `build-iso` GitHub Actions workflow runs the same steps for both images in an Arch container on every push to `main` and every PR that touches `iso/`, `build/`, `packages/` or the workflow. Runs on `main`, and manual runs, then publish both tested ISOs as one Latest release (`build/publish-iso.sh`), with GraceOS Net's packages in a `net-repo-<commit>` release beside it; manual runs also keep the ISOs as workflow artifacts for a week.
 
 ## Try it in a VM
 Create a VM (VMware, VirtualBox, virt-manager or QEMU) with **UEFI** firmware, 4 GB of RAM, 2 or more CPUs and a 30 GB disk, and boot the ISO. The live session logs in as `grace` (no password, `sudo` works) and the desktop starts by itself in about a minute. It runs without 3D acceleration too, using software rendering. Press Super+Space to search apps, or open **Install GraceOS** there to install onto the VM's disk.
