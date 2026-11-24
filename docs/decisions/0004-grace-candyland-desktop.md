@@ -9,7 +9,7 @@ The design asks for GNOME's calm look with Hyprland's compositor-level control (
 ## Decision
 - **Compositor: Hyprland.** It gives auto-tiling, equal gaps, rounding, blur, shadows and animations, configurable live through `hyprctl`. It is in Arch's official repos, and community themes, cursors and plugins already target it.
   - It's tested with 0.56.2.
-  - Hyprland 0.56 made a Lua config the default. We keep the classic `hyprland.conf` format, which 0.56 still loads, because older Hyprland versions on other distros only read that format.
+  - Hyprland 0.56 made a Lua config the default. We keep the classic `hyprland.conf` format, which 0.56 still loads, because older Hyprland versions on other distros only read that format. **Superseded by ADR 0013:** Hyprland 0.57 removed that format, so the config is Lua now.
 - **Shell UI: Quickshell (QML, Qt 6)**, in Arch `[extra]`. It has built-in support for Hyprland IPC and global shortcuts, layer-shell surfaces, a notification server, PipeWire, UPower and power profiles, NetworkManager, BlueZ and desktop entries. So the bar, control center, dock, launcher, notifications and Settings are plain QML with no extra daemons.
 - **Separate repo: `itsHarshDabas/grace-candyland`.**
   - `make install` (with `PREFIX` and `DESTDIR`) works on any distro, and there's an Arch PKGBUILD.

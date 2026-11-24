@@ -28,7 +28,7 @@ smoke() {
     cottoncandy) python3 -c 'import PySide6.QtWebEngineWidgets, PySide6.QtSvg, PySide6.QtNetwork' ;;
     cortex-council) node -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 22 ? 0 : 1)' && test -x /usr/bin/cortex-council ;;
     toffeetwirl) twirl --version --no-sandbox --user-data-dir /tmp/tt | head -1 ;;
-    grace-candyland) command -v Hyprland quickshell >/dev/null && test -f /usr/share/grace-candyland/hyprland.conf ;;
+    grace-candyland) command -v Hyprland quickshell >/dev/null && test -f /usr/share/grace-candyland/hyprland.lua ;;
     *) true ;;
   esac
 }
