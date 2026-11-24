@@ -150,12 +150,21 @@ def human(n: int) -> str:
 
 # ---------------------------------------------------------------- pure helpers
 
-def free_regions(table: dict, minimum: int = 16 * MiB) -> list[tuple[int, int]]:
-    """Free (start, end) byte ranges of one disk from `sfdisk --json`, aligned inward to 1 MiB."""
+def free_regions(table: dict, minimum: int = 16 * MiB, disk_size: int = 0) -> list[tuple[int, int]]:
+    """Free (start, end) byte ranges of one disk from `sfdisk --json`, aligned inward to 1 MiB.
+
+    GPT tables give firstlba/lastlba; MBR ("dos") tables don't, so the disk's size bounds them, and an
+    MBR disk whose four primary slots are used has no room for the new (primary) root partition."""
     t = table["partitiontable"]
     ss = t.get("sectorsize", 512)
     first = t.get("firstlba", 2048) * ss
-    last = (t.get("lastlba", 0) + 1) * ss       # exclusive
+    if "lastlba" in t:
+        last = (t["lastlba"] + 1) * ss          # exclusive
+    else:
+        last = disk_size
+    if t.get("label") == "dos" and sum(
+            1 for p in t.get("partitions", []) if int(re.search(r"(\d+)$", p.get("node", "0")).group(1)) <= 4) >= 4:
+        return []
     taken = sorted((p["start"] * ss, (p["start"] + p["size"]) * ss) for p in t.get("partitions", []))
     regions, cursor = [], first
     for start, end in taken + [(last, last)]:
@@ -196,7 +205,7 @@ def parse_disks(lsblk: dict, tables: dict[str, dict]) -> list[Disk]:
                 label=c.get("label") or c.get("partlabel") or "",
                 mountpoints=[m for m in c.get("mountpoints") or [] if m], sector=ss))
         if table:
-            disk.free = free_regions(table)
+            disk.free = free_regions(table, disk_size=disk.size)
         elif not children:
             disk.free = [(MiB, disk.size // MiB * MiB - MiB)] if disk.size > 2 * MiB else []
         disks.append(disk)

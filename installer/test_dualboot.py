@@ -50,6 +50,16 @@ def test_free_regions_are_aligned_and_skip_tiny_gaps():
     assert 99 * GiB < end - start < 101 * GiB
 
 
+def test_free_regions_on_mbr_disks():
+    # sfdisk --json has no firstlba/lastlba for MBR ("dos") disks: the disk size bounds the free space.
+    mbr = {"partitiontable": {"label": "dos", "sectorsize": 512,
+                              "partitions": [{"node": "/dev/sdc1", "start": 2048, "size": 204800, "type": "7"}]}}
+    assert db.free_regions(mbr, disk_size=200 * MiB) == [(101 * MiB, 200 * MiB)]
+    full = {"partitiontable": {"label": "dos", "sectorsize": 512, "partitions": [
+        {"node": f"/dev/sdc{i}", "start": 2048 + i * 20480, "size": 20480, "type": "83"} for i in range(1, 5)]}}
+    assert db.free_regions(full, disk_size=1000 * MiB) == []  # no primary slot left for root
+
+
 def test_parse_disks_skips_the_live_usb_and_cd():
     disks = db.parse_disks(LSBLK, {"/dev/nvme0n1": SFDISK})
     assert [d.path for d in disks] == ["/dev/nvme0n1", "/dev/sdb"]
