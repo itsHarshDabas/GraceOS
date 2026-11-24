@@ -1,7 +1,7 @@
 # 0013: Grace Candyland's Hyprland config is Lua (supersedes part of 0004)
 
 - Status: proposed, 2026-11-24. Needs Harsh's OK (the shell lead owns `grace-candyland`).
-- Change: grace-candyland PR #5, commit `076c2fb`.
+- Change: grace-candyland PR #5 (merged as `a2526a8`).
 
 ## Context
 ADR 0004 kept the classic `hyprland.conf` format so older Hyprland versions on other distros could still read it. Hyprland 0.57.0 (2026-10-28) removed that format, the `hyprctl keyword` command, and the old `hyprctl dispatch` syntax. Arch ships 0.57, so on GraceOS:
