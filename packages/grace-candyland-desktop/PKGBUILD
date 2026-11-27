@@ -3,15 +3,15 @@
 # local AI and everything Grace Settings' pages use. It leaves the system's name alone
 # (that is graceos-release, which only GraceOS itself installs).
 pkgname=grace-candyland-desktop
-pkgver=2026.11.23
+pkgver=2026.11.27
 pkgrel=1
 pkgdesc="The full Grace Candyland desktop on any Arch system: the Grace shell, CottonCandy, ToffeeTwirl, CherryColaLLM, Cortex Council and what Grace Settings needs"
 arch=(any)
 url=https://github.com/itsHarshDabas/GraceOS
 license=(LicenseRef-unspecified)
 depends=(
-  # GraceOS
-  grace-candyland cottoncandy toffeetwirl cherrycolallm cortex-council
+  # GraceOS (graceos-keyring keeps the [graceos] signing key in pacman's keyring across key updates)
+  graceos-keyring grace-candyland cottoncandy toffeetwirl cherrycolallm cortex-council
   # Local AI for Ask Grace, CherryColaLLM and Cortex Council (CPU build; swap for ollama-cuda/-rocm/-vulkan)
   ollama
   # Grace Settings pages and bar controls

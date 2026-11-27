@@ -1,6 +1,6 @@
 # Maintainer: GraceOS <https://github.com/itsHarshDabas/GraceOS>
 pkgname=graceos-release
-pkgver=2026.11.23
+pkgver=2026.11.27
 pkgrel=1
 pkgdesc="GraceOS identity (os-release kept through filesystem updates), fastfetch look, desktop autostart, zram defaults and grace-wine (optional Wine)"
 arch=(any)

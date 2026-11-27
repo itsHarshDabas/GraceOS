@@ -4,8 +4,8 @@
       {
         "name": "graceos",
         "url": "https://github.com/itsHarshDabas/GraceOS/releases/download/repo-x86_64",
-        "sign_check": "Optional",
-        "sign_option": "TrustAll"
+        "sign_check": "Required",
+        "sign_option": "TrustedOnly"
       }
     ]
   },

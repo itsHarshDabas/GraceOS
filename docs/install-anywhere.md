@@ -3,11 +3,20 @@
 GraceOS's own ISO is one way to get Grace Candyland. These are the others.
 
 ## 1. An existing Arch install: the GraceOS repo
-Add this to the end of `/etc/pacman.conf`:
+Trust the GraceOS signing key once:
+
+```sh
+K=https://raw.githubusercontent.com/itsHarshDabas/GraceOS/main/packages/graceos-keyring
+curl -fsSLO "$K/graceos.gpg"
+sudo pacman-key --add graceos.gpg
+sudo pacman-key --lsign-key "$(curl -fsSL "$K/graceos-trusted" | cut -d: -f1)"
+```
+
+Then add this to the end of `/etc/pacman.conf`:
 
 ```ini
 [graceos]
-SigLevel = Optional TrustAll
+SigLevel = Required
 Server = https://github.com/itsHarshDabas/GraceOS/releases/download/repo-x86_64
 ```
 
@@ -25,8 +34,9 @@ or by typing `grace-candyland` on a text console. For Ask Grace, download a mode
 Want only part of it? Each piece is its own package: `grace-candyland` (the desktop), `cottoncandy`,
 `toffeetwirl`, `cherrycolallm`, `cortex-council`.
 
-> The repo isn't signed yet (`Optional TrustAll`): packages come over HTTPS from GitHub Releases,
-> but nothing proves who built them. Signing is planned before a wider launch (ADR 0006).
+> Every package and the repo database are signed, and pacman refuses anything else
+> (`SigLevel = Required`). `grace-candyland-desktop` pulls in `graceos-keyring`, which keeps the key
+> in pacman's keyring from then on. Details: [ADR 0014](decisions/0014-signed-repo.md).
 
 ## 2. An existing Arch install: the AUR
 Once the packages are published there (the `aur` workflow; see "Publishing to the AUR" below):
@@ -42,6 +52,10 @@ AUR names: `grace-candyland`, `cottoncandy`, `toffeetwirl-bin`, `cherrycolallm`,
 Boot the normal Arch ISO, get online, and run:
 
 ```sh
+K=https://raw.githubusercontent.com/itsHarshDabas/GraceOS/main/packages/graceos-keyring
+curl -fsSLO "$K/graceos.gpg"
+pacman-key --add graceos.gpg
+pacman-key --lsign-key "$(curl -fsSL "$K/graceos-trusted" | cut -d: -f1)"
 curl -LO https://raw.githubusercontent.com/itsHarshDabas/GraceOS/main/installer/archinstall/grace_candyland.py
 archinstall --config-url https://raw.githubusercontent.com/itsHarshDabas/GraceOS/main/installer/archinstall/grace-candyland.json
 ```

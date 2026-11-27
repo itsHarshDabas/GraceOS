@@ -21,5 +21,5 @@ Installed systems got Grace Candyland and the GraceOS `os-release` by copying fi
 ## Consequences
 - `pacman -Syu` updates GraceOS's own packages, and the name stays GraceOS.
 - `graceinstall` no longer patches archinstall internals or copies files.
-- **Unsigned for now** (`SigLevel = Optional TrustAll`): packages come over HTTPS from GitHub, but nothing proves who built them. Signing needs a key kept in a CI secret; required before a public release.
+- **Unsigned at first** (`SigLevel = Optional TrustAll`; signed since ADR 0014): packages come over HTTPS from GitHub, but nothing proves who built them. Signing needs a key kept in a CI secret; required before a public release.
 - Building the ISO needs the repo to exist: run the `packages` workflow (or `build/build-packages.sh`) first.

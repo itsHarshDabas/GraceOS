@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Install Windows App Support
 Comment=Install Wine to run Windows programs (grace-wine)
-Exec=konsole --hide-toolbars -e bash -c "grace-wine install; echo; read -rp 'Press Enter to close' _"
+Exec=grace-launch run bash -c "grace-wine install; echo; read -rp 'Press Enter to close' _"
 Icon=wine
 Type=Application
 Categories=System;
