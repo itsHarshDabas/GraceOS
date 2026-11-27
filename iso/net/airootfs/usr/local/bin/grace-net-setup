@@ -170,7 +170,8 @@ check_published || exit 1
 # pacman checks Arch signatures with the keyring the live system sets up at boot.
 systemctl start pacman-init.service 2>/dev/null || true
 install -d "$SYNC"
-install -m644 "$NET"/sync/*.db "$SYNC"/
+# graceos.db comes with its signature (graceos.db.sig): [graceos] is SigLevel = Required.
+install -m644 "$NET"/sync/*.db "$NET"/sync/*.db.sig "$SYNC"/
 check_space || exit 1
 install_packages || exit 1
 rm -f "$CACHE"/*.pkg.tar.* 2>/dev/null || true   # the downloads live in RAM too

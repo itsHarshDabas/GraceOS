@@ -29,7 +29,12 @@ jobs:
       - if: matrix.edition == 'net'
         run: build/test-net-setup.sh
       # Build GraceOS's own packages here too, so the ISO never waits on the published repo.
-      - run: useradd -m builder && chown -R builder . && su builder -c 'git config --global --add safe.directory "*" && build/build-packages.sh'
+      # Signed with the GraceOS key on main and manual runs. Pull requests sign with a throwaway test key
+      # (and a graceos-keyring holding it), so unreviewed code never carries the real signature.
+      - env:
+          GRACEOS_SIGNING_KEY: "${{ github.event_name != 'pull_request' && secrets.GRACEOS_SIGNING_KEY || '' }}"
+          ALLOW_TEST_KEY: "${{ github.event_name == 'pull_request' && '1' || '' }}"
+        run: useradd -m builder && chown -R builder . && su builder -c 'git config --global --add safe.directory "*" && GPGKEY=$(build/import-signing-key.sh) build/build-packages.sh'
       - run: build/check-packages.sh
       # Net downloads this build's GraceOS packages from the net-repo-<sha7> release that publish-iso.sh creates.
       - env: { REPO: '${{ github.repository }}', SHA: '${{ github.sha }}' }

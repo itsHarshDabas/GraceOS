@@ -81,12 +81,12 @@ HOOK
   if [[ -n ${NET_REPO_URL:-} ]]; then
     [[ -e out/repo/graceos.db ]] || { echo "NET_REPO_URL needs this build's packages in out/repo (build/build-packages.sh)"; exit 1; }
     repo_url=$NET_REPO_URL
-    cp out/repo/graceos.db "$net/sync/"
+    cp out/repo/graceos.db out/repo/graceos.db.sig "$net/sync/"
     rm -rf out/net-repo; cp -a out/repo out/net-repo  # publish-iso.sh uploads these to NET_REPO_URL
   else
     repo_url=$rolling
     echo "WARNING: NET_REPO_URL unset; this Net ISO downloads GraceOS packages from the rolling $rolling"
-    curl -fsSL --retry 5 -o "$net/sync/graceos.db" "$rolling/graceos.db"
+    for f in graceos.db graceos.db.sig; do curl -fsSL --retry 5 -o "$net/sync/$f" "$rolling/$f"; done
   fi
   # The downloads use the build's pacman.conf (NoExtract for docs and locales), with the archive days
   # after the mirrors, the pinned GraceOS repo, and no low-speed abort (the archive is one server and can be slow).
@@ -110,10 +110,19 @@ HOOK
 
 # GraceOS's own packages come from the [graceos] repo in iso/pacman.conf (GitHub Releases).
 # If build/build-packages.sh has built them into out/repo, use those instead.
+signing_key=packages/graceos-keyring/graceos.gpg
 if [[ -e out/repo/graceos.db ]]; then
   sed -i "s|^Server = .*/releases/download/repo-x86_64|Server = file://$PWD/out/repo|" "$stage/pacman.conf"
   echo "using the local GraceOS repo in out/repo"
+  signing_key=out/repo/graceos.gpg  # the key that signed it (a test key in test builds)
 fi
+# [graceos] is SigLevel = Required, and mkarchiso checks packages with this machine's pacman keyring:
+# trust the GraceOS key there (a local signature, like `pacman-key --populate` gives Arch's keys).
+[[ -s $signing_key ]] || { echo "no GraceOS signing key at $signing_key (docs/decisions/0014-signed-repo.md)"; exit 1; }
+signing_fpr=$(gpg --batch --show-keys --with-colons "$signing_key" | awk -F: '/^fpr/ { print $10; exit }')
+pacman-key --add "$signing_key" >/dev/null
+pacman-key --lsign-key "$signing_fpr" >/dev/null
+echo "trusting the GraceOS signing key $signing_fpr for this build"
 
 # graceinstall installs the same GraceOS package sets as this ISO (everything after the first GraceOS marker,
 # with the section markers kept so it can tell the Minimal set apart).

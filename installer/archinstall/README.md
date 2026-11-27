@@ -4,9 +4,18 @@ Install Grace Candyland from the **official Arch Linux ISO** with its stock `arc
 No GraceOS ISO needed. From the Arch ISO's root prompt (online):
 
 ```sh
+K=https://raw.githubusercontent.com/itsHarshDabas/GraceOS/main/packages/graceos-keyring
+curl -fsSLO "$K/graceos.gpg"
+pacman-key --add graceos.gpg
+pacman-key --lsign-key "$(curl -fsSL "$K/graceos-trusted" | cut -d: -f1)"
 curl -LO https://raw.githubusercontent.com/itsHarshDabas/GraceOS/main/installer/archinstall/grace_candyland.py
 archinstall --config-url https://raw.githubusercontent.com/itsHarshDabas/GraceOS/main/installer/archinstall/grace-candyland.json
 ```
+
+The first four lines make the Arch ISO trust the key that signs `[graceos]` (archinstall installs
+with the ISO's keyring); `grace-candyland-desktop` then brings `graceos-keyring`, which adds the
+key to the new system for updates. Compare the fingerprint with the one in
+[`graceos-trusted`](../../packages/graceos-keyring/graceos-trusted) if you want to be sure.
 
 archinstall's normal guided menu opens with these filled in, and you choose the rest
 (disk, user, password, locale, timezone) as usual:

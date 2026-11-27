@@ -133,6 +133,7 @@ curl
 fastfetch
 fd
 git
+graceos-keyring
 graceos-release
 jq
 nodejs

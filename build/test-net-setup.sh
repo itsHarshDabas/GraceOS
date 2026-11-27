@@ -24,6 +24,7 @@ EOF
   printf '# --- GraceOS desktop ---\ngrace-candyland\ncottoncandy\n# --- GraceOS AI ---\ncherrycolallm\n' > "$w/net/packages"
   echo "[options]" > "$w/net/pacman.conf"
   for d in core extra graceos; do echo "$d" > "$w/net/sync/$d.db"; done
+  echo graceos-sig > "$w/net/sync/graceos.db.sig"
   touch "$w/cache/old.pkg.tar.zst"
   echo 100000000000 > "$FAKE/avail"
   echo 0 > "$FAKE/fail_times"
@@ -85,6 +86,7 @@ expect "ethernet: exits 0" '[[ $(cat $w/rc) == 0 ]]'
 expect "ethernet: installs all packages with the pinned pacman.conf and no -y" \
   'grep -qxF "pacman --config $w/net/pacman.conf -S --needed --noconfirm grace-candyland cottoncandy cherrycolallm" "$FAKE/pacman.log" && ! grep -q -- "-Sy" "$FAKE/pacman.log"'
 expect "ethernet: ships the pinned databases into pacman's sync dir" '[[ $(cat "$w/sync/core.db" "$w/sync/extra.db" "$w/sync/graceos.db") == $(printf "core\nextra\ngraceos") ]]'
+expect "ethernet: ships graceos.db's signature with it" '[[ $(cat "$w/sync/graceos.db.sig") == graceos-sig ]]'
 expect "ethernet: initialises the keyring first" 'grep -q "start pacman-init.service" "$FAKE/systemctl.log"'
 expect "ethernet: reports sizes" 'grep -q "3 packages: 3 MiB to download, 6 MiB once installed" "$w/out"'
 expect "ethernet: clears the download cache and marks done" '[[ -e $w/done/installed && ! -e $w/cache/old.pkg.tar.zst ]]'

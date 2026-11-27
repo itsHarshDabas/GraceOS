@@ -48,6 +48,8 @@ for pkg in "${AUR_PACKAGES[@]}"; do
   if [[ $name != "$pkg" ]]; then                          # toffeetwirl -> toffeetwirl-bin
     sed -i "s|^pkgname=.*|pkgname=$name\nprovides=($pkg)\nconflicts=($pkg)|" "$pb"
   fi
+  # graceos-keyring only matters with the [graceos] repo; AUR builds come from source, so drop it.
+  sed -i '/^depends=(/,/)/s/\bgraceos-keyring \?//' "$pb"
   # Inside the AUR, depend on the AUR names.
   for p in "${!AUR_NAME[@]}"; do sed -i "/^depends=(/,/)/s/\b$p\b\([^-]\|$\)/${AUR_NAME[$p]}\1/" "$pb"; done
 

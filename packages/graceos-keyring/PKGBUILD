@@ -1,0 +1,18 @@
+# Maintainer: GraceOS <https://github.com/itsHarshDabas/GraceOS>
+# The public key that signs the [graceos] repo, in pacman's keyring layout (like archlinux-keyring).
+# graceos.gpg and graceos-trusted are written once by build/new-signing-key.sh; the private key
+# lives only in the GRACEOS_SIGNING_KEY secret (and Harsh's offline backup). docs/decisions/0014-signed-repo.md
+pkgname=graceos-keyring
+pkgver=2026.11.27
+pkgrel=1
+pkgdesc="GraceOS PGP key for pacman: lets pacman check that [graceos] packages were signed by GraceOS"
+arch=(any)
+url=https://github.com/itsHarshDabas/GraceOS
+license=(LicenseRef-unspecified)
+install=graceos-keyring.install
+source=(graceos.gpg graceos-trusted graceos-revoked)
+sha256sums=(SKIP SKIP SKIP)
+
+package() {
+  install -Dm644 -t "$pkgdir/usr/share/pacman/keyrings" graceos.gpg graceos-trusted graceos-revoked
+}

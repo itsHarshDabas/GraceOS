@@ -25,13 +25,14 @@ SHARE = Path("/usr/share/graceinstall")
 sys.path[:0] = [str(SHARE), str(Path(__file__).resolve().parent)]
 import dualboot  # noqa: E402
 
-# shortcut: unsigned (Optional TrustAll), packages come over HTTPS from GitHub Releases;
-# sign the repo with a key kept in a CI secret before a public release.
+# Signed with the GraceOS key (docs/decisions/0014-signed-repo.md). The live ISO trusts it (graceos-keyring
+# is on the ISO and pacman-init populates every keyring at boot), pacstrap checks with that keyring, and
+# graceos-keyring's install script adds the key to the new system's keyring for later updates.
 GRACEOS_REPO = {
     "name": "graceos",
     "url": "https://github.com/itsHarshDabas/GraceOS/releases/download/repo-x86_64",
-    "sign_check": "Optional",
-    "sign_option": "TrustAll",
+    "sign_check": "Required",
+    "sign_option": "TrustedOnly",
 }
 
 

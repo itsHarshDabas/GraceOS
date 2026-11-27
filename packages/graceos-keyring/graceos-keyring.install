@@ -1,0 +1,11 @@
+# Add the GraceOS key to pacman's keyring and trust it, the way archlinux-keyring does for Arch's keys.
+# Skipped when the keyring isn't set up yet: pacman-key --populate (with no names) adds it later, as
+# the live ISO's pacman-init.service does at boot.
+populate() {
+  if usr/bin/pacman-key -l >/dev/null 2>&1; then
+    usr/bin/pacman-key --populate graceos
+  fi
+}
+
+post_install() { populate; }
+post_upgrade() { populate; }
