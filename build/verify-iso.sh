@@ -53,12 +53,13 @@ net_checks() {
   check "download pacman.conf: mirrors, then the Arch Linux Archive, and the pinned GraceOS repo" '(. "$net/net.conf"; grep -A2 -x "Include = /etc/pacman.d/mirrorlist" "$net/pacman.conf" | grep -Eq "^Server = https://archive.archlinux.org/repos/[0-9]{4}/[0-9]{2}/[0-9]{2}/\\\$repo/os/\\\$arch$" && grep -qxF "Server = $GRACEOS_REPO_URL" "$net/pacman.conf") && ! grep -q "^Server = file://" "$net/pacman.conf"'
   check "the build-time database hook removed itself" '[[ ! -e $sfs/etc/pacman.d/hooks/zzzz98-graceos-net-keep-databases.hook ]]'
   for db in core extra graceos; do check "pinned $db database on the ISO" '[[ -s $net/sync/$db.db ]]'; done
+  check "graceos database signature on the ISO" '[[ -s $net/sync/graceos.db.sig ]]'
   for p in grace-candyland cottoncandy toffeetwirl cherrycolallm cortex-council ollama; do
     check "downloads $p" 'grep -qx "$p" "$net/packages"'
   done
   # Every download resolves in the pinned databases (pacman -Sp only prints URLs; nothing is fetched).
   local tmp; tmp=$(mktemp -d)
-  mkdir -p "$tmp/sync" "$tmp/local" && cp "$net"/sync/*.db "$tmp/sync/"
+  mkdir -p "$tmp/sync" "$tmp/local" && cp "$net"/sync/*.db "$net"/sync/*.db.sig "$tmp/sync/"
   check "every download resolves in the pinned databases" \
     'mapfile -t pk < <(grep -v "^\s*#" "$net/packages" | grep .) && pacman --config "$net/pacman.conf" --dbpath "$tmp" -Sp "${pk[@]}" > "$tmp/urls" && echo "     $(wc -l < "$tmp/urls") files to download"'
   rm -rf "$tmp"
