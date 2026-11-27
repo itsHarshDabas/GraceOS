@@ -120,6 +120,8 @@ fi
 # trust the GraceOS key there (a local signature, like `pacman-key --populate` gives Arch's keys).
 [[ -s $signing_key ]] || { echo "no GraceOS signing key at $signing_key (docs/decisions/0014-signed-repo.md)"; exit 1; }
 signing_fpr=$(gpg --batch --show-keys --with-colons "$signing_key" | awk -F: '/^fpr/ { print $10; exit }')
+# A keyring without a local master key (the archlinux Docker image ships one) can't lsign: make one.
+pacman-key --list-secret-keys 2>/dev/null | grep -q '^sec' || pacman-key --init >/dev/null
 pacman-key --add "$signing_key" >/dev/null
 pacman-key --lsign-key "$signing_fpr" >/dev/null
 echo "trusting the GraceOS signing key $signing_fpr for this build"

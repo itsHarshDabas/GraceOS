@@ -9,7 +9,7 @@ if [[ -n ${GRACEOS_SIGNING_KEY:-} ]]; then
   printf '%s\n' "$GRACEOS_SIGNING_KEY" | gpg --batch --quiet --import
 elif [[ ${ALLOW_TEST_KEY:-} == 1 ]]; then
   echo "GRACEOS_SIGNING_KEY is not set: signing with a throwaway test key" >&2
-  gpg --batch --quiet --passphrase '' --quick-gen-key "GraceOS CI test key" ed25519 sign 1d
+  gpg --batch --quiet --yes --passphrase '' --quick-gen-key "GraceOS CI test key" ed25519 sign 1d
 else
   echo "GRACEOS_SIGNING_KEY is not set. Run build/new-signing-key.sh once (docs/decisions/0014-signed-repo.md)." >&2
   exit 1
