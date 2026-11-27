@@ -3,11 +3,15 @@
 pkgname=cherrycolallm
 pkgver=r0
 pkgrel=1
-pkgdesc="CherryColaLLM: local model inference for GraceOS (Ollama by default, LM Studio and llama.cpp supported)"
-arch=(any)
+pkgdesc="CherryColaLLM: local model inference for GraceOS (Ollama by default; llama.cpp built in; LM Studio and AirLLM supported)"
+# Carries llama.cpp's Vulkan release build, like CherryColaLLM's own packages
+# (its packaging/llamacpp.env pins the same one), so .gguf files on disk run
+# in place with nothing else installed.
+_llamacpp=b12800
+arch=(x86_64)
 url=https://github.com/itsHarshDabas/CherryColaLLM
 license=(LicenseRef-unspecified)
-depends=(python)
+depends=(python vulkan-icd-loader gcc-libs openssl)
 optdepends=(
   'ollama: run models on the CPU (or ollama-cuda, ollama-rocm, ollama-vulkan for a GPU)'
   'python-gobject: the CherryColaLLM chat app'
@@ -19,8 +23,11 @@ provides=(cherrycola)
 conflicts=(cherrycola)
 replaces=(cherrycola)
 makedepends=(git)
-source=("git+$url.git#commit=${CHERRYCOLALLM_COMMIT:?set CHERRYCOLALLM_COMMIT}")
-sha256sums=(SKIP)
+source=("git+$url.git#commit=${CHERRYCOLALLM_COMMIT:?set CHERRYCOLALLM_COMMIT}"
+        "https://github.com/ggml-org/llama.cpp/releases/download/$_llamacpp/llama-$_llamacpp-bin-ubuntu-vulkan-x64.tar.gz")
+sha256sums=(SKIP
+            daac51e306d5522f9f75d95d7fbb4469adfb523816edf118eacef479e857e5ae)
+options=(!strip !debug)
 
 pkgver() {
   cd CherryColaLLM
@@ -38,4 +45,13 @@ package() {
   ln -s cherrycolallm-chat "$pkgdir/usr/bin/cherrycola-chat"
   install -Dm644 data/org.graceos.CherryCola.desktop "$pkgdir/usr/share/applications/org.graceos.CherryCola.desktop"
   install -Dm644 data/org.graceos.CherryCola.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/org.graceos.CherryCola.svg"
+  # The bundled llama.cpp: only the server, quantize, imatrix and libraries.
+  local llama="$srcdir/llama-$_llamacpp" dest="$pkgdir/usr/lib/cherrycola/llama.cpp"
+  install -d "$dest"
+  cp -P "$llama"/llama-server "$llama"/llama-quantize "$llama"/llama-imatrix "$dest/"
+  for f in "$llama"/lib*.so*; do
+    case ${f##*/} in libllama-server-impl.so*|libllama-quantize-impl.so*) cp -P "$f" "$dest/" ;;
+      libllama-*-impl.so*) ;; *) cp -P "$f" "$dest/" ;; esac
+  done
+  install -Dm644 "$llama/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/llama.cpp-LICENSE"
 }
